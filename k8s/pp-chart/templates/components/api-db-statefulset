@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pp-api-db
+spec:
+  replicas: {{ .Values.api-db.replicaCount }}
+  serviceName: pp-api-db
+  selector:
+    matchLabels:
+      app: pp-api-db
+  template:
+    metadata:
+      labels:
+        app: pp-api-db
+    spec:
+      containers:
+        - name: pp-api-db
+          image: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pp-api-db-secrets
+                  key: db_username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pp-api-db-secrets
+                  key: db_password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: pp-api-db-config
+                  key: db_name
+            # - name: POSTGRES_HOST_AUTH_METHOD
+            #   # this is not a secret, but a flag
+            #   value: password            
+          ports:
+            - containerPort: 5432

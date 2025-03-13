@@ -1,2 +1,2 @@
 .env
-keycloak
+.chart-secrets.yaml

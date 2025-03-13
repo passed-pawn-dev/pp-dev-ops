@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pp-keycloak-db
+spec:
+  selector:
+    app: pp-keycloak-db
+  type: ClusterIP
+  ports:
+    - port: 
+        valueFrom:
+          configMapKeyRef:
+            name: pp-keycloak-db-config
+            key: db_port
+      targetPort: 5432
