@@ -6,20 +6,17 @@ metadata:
     app.kubernetes.io/name: pp
     app.kubernetes.io/version: 1.0.0
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  ingressClassName: {{ .Values.ingress.controller.ingressClassResource.name | default "nginx" }}
+  ingressClassName: nginx
   rules:
-    - host: {{ .Values.ingress.host | default "fitness-challenge-tracker" }}
+    - host: {{ .Values.ingress.host | default "passed-pawn" }}
       http:
         paths:
-          - path: /
+          - path: /(.*)
             pathType: Prefix
             backend:
               service:
                 name: pp-api
-                port:
-              valueFrom:
-                configMapKeyRef:
-                  name: pp-api-config
-                  key: api_port
+                port: 
+                  number: 8080

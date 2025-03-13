@@ -1,0 +1,36 @@
+ingress:
+  host: localhost
+  controller:
+    service:
+      type: LoadBalancer
+    ingressClassResource:
+      enabled: true
+      name: fct-nginx
+      default: true
+    admissionWebhooks:
+      enabled: true
+
+api:
+  replicaCount: 1
+  image: ""
+  imagePullPolicy: ""
+  db:
+    replicaCount: 1
+    name: passedpawn
+    username: ""
+    password: ""
+    host: pp-api-db
+  
+keycloak:
+  image: quay.io/keycloak/keycloak:26.0.5
+  replicaCount: 1
+  adminUsername: ""
+  adminPassword: ""
+  db:
+    replicaCount: 1
+    vendor: postgres
+    host: pp-keycloak-db
+    name: pp-keycloak
+    username: ""
+    password: ""
+

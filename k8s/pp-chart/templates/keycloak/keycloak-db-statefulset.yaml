@@ -3,7 +3,7 @@ kind: StatefulSet
 metadata:
   name: pp-keycloak-db
 spec:
-  replicas: {{ .Values.keycloak-db.replicaCount }}
+  replicas: {{ .Values.keycloak.db.replicaCount }}
   serviceName: pp-keycloak-db
   selector:
     matchLabels:

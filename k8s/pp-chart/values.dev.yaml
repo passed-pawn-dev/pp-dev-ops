@@ -5,7 +5,7 @@ ingress:
       type: LoadBalancer
     ingressClassResource:
       enabled: true
-      name: pp-nginx
+      name: fct-nginx
       default: true
     admissionWebhooks:
       enabled: true
@@ -14,31 +14,22 @@ api:
   replicaCount: 1
   image: ""
   imagePullPolicy: ""
-  # port opened inside the cluster
-  port: 8080
-
-api-db:
-  replicaCount: 1
-  name: passedpawn
-  username: ""
-  password: ""
-  host: pp-api-db
-  # port opened inside the cluster
-  port: 5432
-
+  db:
+    replicaCount: 1
+    name: passedpawn
+    username: ""
+    password: ""
+    host: pp-api-db
+  
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5
   replicaCount: 1
   adminUsername: ""
   adminPassword: ""
-  # port opened inside the cluster
-  port: 8080
   db:
     replicaCount: 1
     vendor: postgres
     host: pp-keycloak-db
-    # port opened inside the cluster
-    port: 5432
     name: pp-keycloak
     username: ""
     password: ""

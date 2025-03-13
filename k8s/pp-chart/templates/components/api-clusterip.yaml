@@ -5,11 +5,6 @@ metadata:
 spec:
   selector:
     app: pp-api
-  type: ClusterIP
   ports:
-    - port: 
-        valueFrom:
-          configMapKeyRef:
-            name: pp-api-config
-            key: api_port      
+    - port: 8080    
       targetPort: 8080

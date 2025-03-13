@@ -1,33 +1,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: pp-api-config
-data:
-  api_port: {{ .Values.api.port }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: pp-keycloak-config
-data:
-  keycloak_port: {{ .Values.keycloak.port }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: pp-api-db-config
 data:
-  db_host: {{ .Values.api-db.host }}
-  db_name: {{ .Values.api-db.name }}
-  db_port: {{ .Values.api-db.port }}
+  db_host: {{ .Values.api.db.host }}
+  db_name: {{ .Values.api.db.name }}
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: pp-keycloak-db-config
 type: Opaque
 data:
   db_vendor: {{ .Values.keycloak.db.vendor }}
   db_host: {{ .Values.keycloak.db.host }}
-  db_port: {{ .Values.keycloak.db.port }}
   db_name: {{ .Values.keycloak.db.name }}

@@ -3,7 +3,7 @@ kind: StatefulSet
 metadata:
   name: pp-api-db
 spec:
-  replicas: {{ .Values.api-db.replicaCount }}
+  replicas: {{ .Values.api.db.replicaCount }}
   serviceName: pp-api-db
   selector:
     matchLabels:

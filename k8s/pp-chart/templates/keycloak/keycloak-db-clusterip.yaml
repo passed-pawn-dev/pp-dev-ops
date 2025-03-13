@@ -7,9 +7,5 @@ spec:
     app: pp-keycloak-db
   type: ClusterIP
   ports:
-    - port: 
-        valueFrom:
-          configMapKeyRef:
-            name: pp-keycloak-db-config
-            key: db_port
+    - port: 5432
       targetPort: 5432

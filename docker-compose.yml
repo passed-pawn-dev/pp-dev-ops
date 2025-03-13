@@ -1,29 +1,43 @@
-version: '3.9'
-
 services:
   postgres:
+    container_name: pp-postgres
     image: postgres
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: passedpawn
+    networks:
+      - api-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U user -d passedpawn"]
       interval: 10s
-      retries: 5
+      retries: 3
       start_period: 30s
       timeout: 10s
-      
+
   api:
-    image: pp-backend
+    container_name: pp-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pp-api
     ports: 
       - 8080:8080
+    networks:
+      - api-network
     depends_on: 
       postgres:
         condition: service_healthy
         restart: true
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'if echo -n > /dev/tcp/localhost/8080; then exit 0; else exit 1; fi'"]
+      interval: 10s
+      retries: 3
+      start_period: 15s
+      timeout: 10s
 
   keycloak:
+    container_name: pp-keycloak
     image: quay.io/keycloak/keycloak:26.0.5
     ports:
       - 8081:8080
@@ -33,28 +47,45 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       DB_VENDOR: postgres
       DB_ADDR: keycloak-postgres
-      DB_PORT: ${POSTGRES_DB_PORT}
-      DB_DATABASE: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PORT: ${KEYCLOAK_POSTGRES_DB_PORT}
+      DB_DATABASE: ${KEYCLOAK_POSTGRES_DB}
+      DB_USER: ${KEYCLOAK_POSTGRES_USER}
+      DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
     volumes:
       - ./keycloak:/opt/keycloak/data/import
     networks:
-      - app-network
+      - keycloak-network
+      - api-network
 
   keycloak-postgres:
+    container_name: pp-keycloak-postgres
     image: postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${KEYCLOAK_POSTGRES_DB}
+      POSTGRES_USER: ${KEYCLOAK_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
     networks:
-      - app-network
+      - keycloak-network
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
 
+  nginx:
+    container_name: pp-nginx
+    image: nginx:stable-alpine3.20-perl
+    ports:
+      - '5500:5500'
+    depends_on:
+      api: 
+        condition: service_healthy
+        restart: true
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - api-network
+    
 networks:
-  app-network:
+  keycloak-network:
+  api-network:
 
 volumes:
   keycloak-db-data:

@@ -6,9 +6,5 @@ spec:
   selector:
     app: pp-api-db
   ports:
-    - port: 
-        valueFrom:
-          configMapKeyRef:
-            name: pp-api-config
-            key: db_port
+    - port: 5432
       targetPort: 5432
