@@ -38,13 +38,7 @@ spec:
                   name: pp-api-db-secrets
                   key: db_password
             - name: DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: pp-api-db-config
-                  key: db_name
+              value: {{ .Values.api.db.name }}
             - name: DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: pp-api-db-config
-                  key: db_host
+              value: {{ .Values.api.db.host }}
 

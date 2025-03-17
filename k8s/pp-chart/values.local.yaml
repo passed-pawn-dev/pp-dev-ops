@@ -1,5 +1,6 @@
 ingress:
-  host: localhost
+  applicationHost: localhost
+  keycloakHost: localhost
   controller:
     service:
       type: LoadBalancer
@@ -31,6 +32,7 @@ keycloak:
     vendor: postgres
     host: pp-keycloak-db
     name: pp-keycloak
+    port: 5432
     username: ""
     password: ""
 

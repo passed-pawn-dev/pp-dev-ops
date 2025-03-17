@@ -28,10 +28,7 @@ spec:
                   name: pp-keycloak-db-secrets
                   key: db_password
             - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: pp-keycloak-db-config
-                  key: db_name
+              value: {{ .Values.keycloak.db.name }}
             # - name: POSTGRES_HOST_AUTH_METHOD
             #   # this is not a secret, but a flag
             #   value: password            

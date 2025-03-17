@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pp-keycloak
+spec:
+  replicas: {{ .Values.keycloak.replicaCount }}
+  selector:
+    matchLabels:
+      app: pp-keycloak
+  template:
+    metadata:
+      labels:
+        app: pp-keycloak
+    spec:
+      containers:
+        - name: pp-keycloak
+          image: {{ .Values.keycloak.image }}
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: pp-keycloak-secrets
+                  key: admin_username
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pp-keycloak-secrets
+                  key: admin_password
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pp-keycloak-db-secrets
+                  key: db_username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pp-keycloak-db-secrets
+                  key: db_password
+            - name: DB_VENDOR
+              value: {{ .Values.keycloak.db.vendor }}
+            - name: DB_ADDR
+              value: {{ .Values.keycloak.db.host }}
+            - name: DB_DATABASE
+              value: {{ .Values.keycloak.db.name }}
+            - name: DB_PORT
+              value: {{ .Values.keycloak.db.port }}
+            - name: HOSTNAME
+              value: {{ .Values.ingress.keycloakHost }}

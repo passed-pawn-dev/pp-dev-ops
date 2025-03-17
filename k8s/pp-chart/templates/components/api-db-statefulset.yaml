@@ -28,10 +28,7 @@ spec:
                   name: pp-api-db-secrets
                   key: db_password
             - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: pp-api-db-config
-                  key: db_name
+              value: {{ .Values.api.db.name }}
             # - name: POSTGRES_HOST_AUTH_METHOD
             #   # this is not a secret, but a flag
             #   value: password            
