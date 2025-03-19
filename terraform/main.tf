@@ -58,8 +58,17 @@ resource "keycloak_oidc_google_identity_provider" "google_oidc_idp" {
   client_id     = var.google_client_id
   client_secret = var.google_client_secret
   trust_email   = true
+}
 
-  extra_config = {
-    "myCustomConfigKey" = "myValue"
-  }
+variable "pp_api_client_roles" {
+  type = list(string)
+  default = ["student", "coach"]
+}
+
+resource "keycloak_role" "client_role" {
+  for_each = toset(var.pp_api_client_roles)
+  realm_id    = keycloak_realm.realm.id
+  client_id   = keycloak_openid_client.pp_api_client.id
+  name        = each.value
+  description = format("App's %s user", each.value)
 }

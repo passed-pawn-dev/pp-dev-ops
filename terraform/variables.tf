@@ -1,8 +1,29 @@
-variable "keycloak_admin_username" {}
-variable "keycloak_admin_password" {}
-variable "google_client_id" {}
-variable "google_client_secret" {}
+variable "keycloak_admin_username" {
+  type        = string
+  description = "Keycloak admin username"
+  # don't put sensitive values into source control
+  # hides cli output value 
+  sensitive = true
+}
+
+variable "keycloak_admin_password" {
+  type        = string
+  description = "Keycloak admin password"
+  sensitive   = true
+}
+
+variable "google_client_id" {
+  type        = string
+  description = "Google OIDC client id"
+}
+
+variable "google_client_secret" {
+  type        = string
+  description = "Google OIDC client secret"
+  sensitive   = true
+}
 
 variable "keycloak_url" {
-  default = "http://localhost:8081"
+  type        = string
+  description = "Keycloak server URL"
 }
