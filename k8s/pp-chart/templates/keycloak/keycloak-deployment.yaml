@@ -15,6 +15,7 @@ spec:
       containers:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
+          args: ["start-dev"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
@@ -43,6 +44,6 @@ spec:
             - name: DB_DATABASE
               value: {{ .Values.keycloak.db.name }}
             - name: DB_PORT
-              value: {{ .Values.keycloak.db.port }}
+              value: "{{ .Values.keycloak.db.port }}"
             - name: HOSTNAME
               value: {{ .Values.ingress.keycloakHost }}

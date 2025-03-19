@@ -42,15 +42,16 @@ services:
     ports:
       - 8081:8080
     command: -v start-dev --import-realm
+    # command: -v start-dev
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      DB_VENDOR: postgres
-      DB_ADDR: keycloak-postgres
-      DB_PORT: ${KEYCLOAK_POSTGRES_DB_PORT}
-      DB_DATABASE: ${KEYCLOAK_POSTGRES_DB}
-      DB_USER: ${KEYCLOAK_POSTGRES_USER}
-      DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
+      # DB_VENDOR: postgres
+      # DB_ADDR: keycloak-postgres
+      # DB_PORT: ${KEYCLOAK_POSTGRES_DB_PORT}
+      # DB_DATABASE: ${KEYCLOAK_POSTGRES_DB}
+      # DB_USER: ${KEYCLOAK_POSTGRES_USER}
+      # DB_PASSWORD: ${KEYCLOAK_POSTGRES_PASSWORD}
     volumes:
       - ./keycloak:/opt/keycloak/data/import
     networks:

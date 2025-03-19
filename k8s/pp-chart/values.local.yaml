@@ -1,6 +1,6 @@
 ingress:
-  applicationHost: localhost
-  keycloakHost: localhost
+  applicationHost: pp-local.passed-pawn.com
+  keycloakHost: auth-local.passed-pawn.com
   controller:
     service:
       type: LoadBalancer

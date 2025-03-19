@@ -1,2 +1,11 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# secrets
 .env
 chart-secrets.yaml
+*.tfvars
