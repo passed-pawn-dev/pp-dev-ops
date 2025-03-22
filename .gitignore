@@ -11,4 +11,4 @@ keycloak-realm-export
 # secrets
 .env
 chart-secrets.yaml
-*.tfvars
+*secrets.tfvars

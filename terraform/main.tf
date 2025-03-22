@@ -8,10 +8,10 @@ terraform {
 }
 
 provider "keycloak" {
-    client_id     = "admin-cli"
-    username      = var.keycloak_admin_username
-    password      = var.keycloak_admin_password
-    url           = var.keycloak_url
+  client_id     = "admin-cli"
+  username      = var.keycloak_admin_username
+  password      = var.keycloak_admin_password
+  url           = var.keycloak_url
 }
 
 data "keycloak_openid_client" "realm_management" {
@@ -25,7 +25,7 @@ resource "keycloak_realm" "realm" {
   display_name      = "passed-pawn"
   display_name_html = "<b>passed-pawn</b>"
 
-  login_theme = "base"
+  login_theme = "keycloak"
 
   access_code_lifespan = "1h"
 }
@@ -40,8 +40,23 @@ resource "keycloak_openid_client" "pp_api_client" {
   service_accounts_enabled = true
 }
 
+resource "keycloak_openid_client" "pp_frontend_client" {
+  realm_id                        = keycloak_realm.realm.id
+  client_id                       = "pp-frontend"
+  name                            = "pp-frontend"
+  enabled                         = true
+
+  access_type                     = "PUBLIC"
+  standard_flow_enabled           = true
+
+  valid_redirect_uris             = var.valid_redirect_uris
+  valid_post_logout_redirect_uris = var.valid_post_logout_redirect_uris
+  web_origins                     = var.web_origins
+}
+
 variable "pp_api_client_service_account_roles" {
   type    = list(string)
+  # TODO - restrict to bare minimum necessary roles
   default = ["manage-events", "realm-admin", "create-client", "view-realm", "view-clients", "query-realms", "view-authorization", "query-groups", "manage-authorization", "manage-clients", "impersonation", "query-clients", "manage-users", "query-users", "view-identity-providers", "manage-identity-providers", "manage-realm", "view-users", "view-events"]
 }
 

@@ -27,3 +27,18 @@ variable "keycloak_url" {
   type        = string
   description = "Keycloak server URL"
 }
+
+variable "valid_post_logout_redirect_uris" {
+  type        = list(string)
+  description = "Allowed post logout redirect uris for the pp-frontend keycloak client"
+}
+
+variable "valid_redirect_uris" {
+  type        = list(string)
+  description = "Allowed redirect uris for the pp-frontend keycloak client"
+}
+
+variable "web_origins" {
+  type        = list(string)
+  description = "Allowed web origins for the pp-frontend keycloak client"
+}
