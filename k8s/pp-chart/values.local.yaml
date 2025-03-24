@@ -6,7 +6,7 @@ ingress:
       type: LoadBalancer
     ingressClassResource:
       enabled: true
-      name: fct-nginx
+      name: pp-nginx
       default: true
     admissionWebhooks:
       enabled: true
@@ -36,3 +36,42 @@ keycloak:
     username: ""
     password: ""
 
+jenkins-operator:
+  jenkins:
+    # default was 2.452.2-lts, upgraded due to known vulnerabilities
+    image: jenkins/jenkins:2.492.2-lts
+
+    # 2.452.2-lts jenkins compatible base plugins
+    # basePlugins:
+    # - name: kubernetes
+    #   version: 4246.v5a_12b_1fe120e
+    # - name: workflow-job
+    #   version: 1400.v7fd111b_ec82f
+    # - name: workflow-aggregator
+    #   version: 596.v8c21c963d92d
+    # - name: git
+    #   version: 5.2.2
+    # - name: job-dsl
+    #   version: "1.87"
+    # - name: configuration-as-code
+    # # swapped for newer version as the default (1830) didn't work with other defaults
+    #   version: 1836.vccda_4a_122a_a_e
+    # - name: kubernetes-credentials-provider
+    #   version: 1.262.v2670ef7ea_0c5
+
+    # 2.492.2-lts jenkins compatible base plugins
+    basePlugins:
+    - name: kubernetes
+      version: 4246.v5a_12b_1fe120e
+    - name: workflow-job
+      version: 1505.vea_4b_20a_4a_495
+    - name: workflow-aggregator
+      version: 596.v8c21c963d92d
+    - name: git
+      version: 5.2.2
+    - name: job-dsl
+      version: "1.87"
+    - name: configuration-as-code
+      version: 1932.v75cb_b_f1b_698d
+    - name: kubernetes-credentials-provider
+      version: 1.262.v2670ef7ea_0c5
