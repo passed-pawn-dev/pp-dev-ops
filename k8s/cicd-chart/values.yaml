@@ -38,14 +38,21 @@ jenkins-operator:
     # - name: kubernetes-credentials-provider
     #   version: 1.262.v2670ef7ea_0c5
 
-    seedJobs:
-    - id: pp-dev-ops
-      credentialType: basicSSHUserPrivateKey
-      credentialID: pp-dev-ops-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Dev ops passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops.git
+  seedJobs:
+  - id: jenkins-operator
+    targets: "cicd/jobs/*.jenkins"
+    description: "Jenkins Operator repository"
+    repositoryBranch: master
+    repositoryUrl: https://github.com/jenkinsci/kubernetes-operator.git
+
+    # seedJobs:
+    # - id: pp-dev-ops
+    #   credentialType: basicSSHUserPrivateKey
+    #   credentialID: pp-dev-ops-ssh
+    #   targets: "cicd/jobs/*.jenkins"
+    #   description: "Dev ops passed pawn repository"
+    #   repositoryBranch: main
+    #   repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops.git
           
     # - id: pp-frontend
     #   credentialType: basicSSHUserPrivateKey

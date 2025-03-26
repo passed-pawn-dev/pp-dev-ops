@@ -19,10 +19,10 @@ pipelineJob('k8s-e2e') {
             scm {
                 git {
                     remote {
-                        url('https://github.com/toKrzysztof/passed-pawn-dev-ops.git')
-                        credentials('pp-dev-ops-ssh')
+                        url('https://github.com/jenkinsci/kubernetes-operator.git')
+                        credentials('jenkins-operator')
                     }
-                    branches('*/main')
+                    branches('*/master')
                 }
             }
             scriptPath('cicd/pipelines/k8s.jenkins')
