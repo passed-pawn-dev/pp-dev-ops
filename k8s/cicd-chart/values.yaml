@@ -45,7 +45,7 @@ jenkins-operator:
       targets: "cicd/jobs/*.jenkins"
       description: "Dev ops passed pawn repository"
       repositoryBranch: main
-      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops
+      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops.git
           
     # - id: pp-frontend
     #   credentialType: basicSSHUserPrivateKey
@@ -53,7 +53,7 @@ jenkins-operator:
     #   targets: "cicd/jobs/*.jenkins"
     #   description: "Frontend passed pawn repository"
     #   repositoryBranch: main
-    #   repositoryUrl: https://github.com/toKrzysztof/passed-pawn-frontend
+    #   repositoryUrl: https://github.com/toKrzysztof/passed-pawn-frontend.git
       
     # - id: pp-backend
     #   credentialType: basicSSHUserPrivateKey
@@ -61,7 +61,7 @@ jenkins-operator:
     #   targets: "cicd/jobs/*.jenkins"
     #   description: "Backend passed pawn repository"
     #   repositoryBranch: main
-    #   repositoryUrl: https://github.com/toKrzysztof/PassedPawn-backend
+    #   repositoryUrl: https://github.com/toKrzysztof/PassedPawn-backend.git
 
 secrets:
   ppDevOpsSshPrivateKey: ""

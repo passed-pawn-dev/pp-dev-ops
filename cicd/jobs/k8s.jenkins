@@ -19,8 +19,8 @@ pipelineJob('k8s-e2e') {
             scm {
                 git {
                     remote {
-                        url('https://github.com/jenkinsci/kubernetes-operator.git')
-                        credentials('jenkins-operator')
+                        url('https://github.com/toKrzysztof/passed-pawn-dev-ops.git')
+                        credentials('pp-dev-ops-ssh')
                     }
                     branches('*/master')
                 }
