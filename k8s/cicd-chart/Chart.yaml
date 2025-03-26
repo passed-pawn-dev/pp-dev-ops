@@ -1,14 +1,11 @@
 apiVersion: v2
-name: pp
-description: Passed pawn application chart
+name: cicd
+description: Cicd chart
 type: application
 version: 1.0.0
 appVersion: "1.0.0"
 
 dependencies:
-  - name: ingress-nginx
-    version: 4.12.0 
-    repository: https://kubernetes.github.io/ingress-nginx
   - name: jenkins-operator
     version: 0.8.1
     repository: https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/chart

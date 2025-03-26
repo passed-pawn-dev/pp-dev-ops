@@ -1,0 +1,69 @@
+jenkins-operator:
+  jenkins:
+    # default was 2.452.2-lts, upgraded to patch known vulnerabilities
+    image: jenkins/jenkins:2.492.2-lts
+
+    # 2.452.2-lts jenkins compatible base plugins
+    # basePlugins:
+    # - name: kubernetes
+    #   version: 4246.v5a_12b_1fe120e
+    # - name: workflow-job
+    #   version: 1400.v7fd111b_ec82f
+    # - name: workflow-aggregator
+    #   version: 596.v8c21c963d92d
+    # - name: git
+    #   version: 5.2.2
+    # - name: job-dsl
+    #   version: "1.87"
+    # - name: configuration-as-code
+    # # swapped for newer version as the default (1830) didn't work with other defaults
+    #   version: 1836.vccda_4a_122a_a_e
+    # - name: kubernetes-credentials-provider
+    #   version: 1.262.v2670ef7ea_0c5
+
+    # 2.492.2-lts jenkins compatible base plugins
+    basePlugins:
+    - name: kubernetes
+      version: 4246.v5a_12b_1fe120e
+    - name: workflow-job
+      version: 1505.vea_4b_20a_4a_495
+    - name: workflow-aggregator
+      version: 596.v8c21c963d92d
+    - name: git
+      version: 5.2.2
+    - name: job-dsl
+      version: "1.87"
+    - name: configuration-as-code
+      version: 1932.v75cb_b_f1b_698d
+    - name: kubernetes-credentials-provider
+      version: 1.262.v2670ef7ea_0c5
+
+    seedJobs:
+    - id: pp-dev-ops
+      credentialType: basicSSHUserPrivateKey
+      credentialID: pp-dev-ops-ssh
+      targets: "cicd/jobs/*.jenkins"
+      description: "Dev ops passed pawn repository"
+      repositoryBranch: main
+      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops
+          
+    - id: pp-frontend
+      credentialType: basicSSHUserPrivateKey
+      credentialID: pp-frontend-ssh
+      targets: "cicd/jobs/*.jenkins"
+      description: "Frontend passed pawn repository"
+      repositoryBranch: main
+      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-frontend
+      
+    - id: pp-backend
+      credentialType: basicSSHUserPrivateKey
+      credentialID: pp-backend-ssh
+      targets: "cicd/jobs/*.jenkins"
+      description: "Backend passed pawn repository"
+      repositoryBranch: main
+      repositoryUrl: https://github.com/toKrzysztof/PassedPawn-backend
+
+secrets:
+  pp-dev-ops-ssh-private-key: ""
+  pp-frontend-ssh-private-key: ""
+  pp-backend-ssh-private-key: ""
