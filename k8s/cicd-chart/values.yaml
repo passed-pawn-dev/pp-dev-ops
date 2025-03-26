@@ -38,32 +38,32 @@ jenkins-operator:
     - name: kubernetes-credentials-provider
       version: 1.262.v2670ef7ea_0c5
 
-    seedJobs:
-    - id: pp-dev-ops
-      credentialType: basicSSHUserPrivateKey
-      credentialID: pp-dev-ops-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Dev ops passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops
+    # seedJobs:
+    # - id: pp-dev-ops
+    #   credentialType: basicSSHUserPrivateKey
+    #   credentialID: pp-dev-ops-ssh
+    #   targets: "cicd/jobs/*.jenkins"
+    #   description: "Dev ops passed pawn repository"
+    #   repositoryBranch: main
+    #   repositoryUrl: https://github.com/toKrzysztof/passed-pawn-dev-ops
           
-    - id: pp-frontend
-      credentialType: basicSSHUserPrivateKey
-      credentialID: pp-frontend-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Frontend passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: https://github.com/toKrzysztof/passed-pawn-frontend
+    # - id: pp-frontend
+    #   credentialType: basicSSHUserPrivateKey
+    #   credentialID: pp-frontend-ssh
+    #   targets: "cicd/jobs/*.jenkins"
+    #   description: "Frontend passed pawn repository"
+    #   repositoryBranch: main
+    #   repositoryUrl: https://github.com/toKrzysztof/passed-pawn-frontend
       
-    - id: pp-backend
-      credentialType: basicSSHUserPrivateKey
-      credentialID: pp-backend-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Backend passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: https://github.com/toKrzysztof/PassedPawn-backend
+    # - id: pp-backend
+    #   credentialType: basicSSHUserPrivateKey
+    #   credentialID: pp-backend-ssh
+    #   targets: "cicd/jobs/*.jenkins"
+    #   description: "Backend passed pawn repository"
+    #   repositoryBranch: main
+    #   repositoryUrl: https://github.com/toKrzysztof/PassedPawn-backend
 
 secrets:
-  pp-dev-ops-ssh-private-key: ""
-  pp-frontend-ssh-private-key: ""
-  pp-backend-ssh-private-key: ""
+  ppDevOpsSshPrivateKey: ""
+  ppFrontendSshPrivateKey: ""
+  ppBackendSshPrivateKey: ""
