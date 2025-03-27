@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-operator-user-configuration
+data:
+  base-config.yaml: |
+    jenkins:
+      systemMessage: "Configuration as Code integration works!!!"
+    security:
+      gitHostKeyVerificationConfiguration:
+        sshHostKeyVerificationStrategy:
+          manuallyProvidedKeyVerificationStrategy:
+            approvedHostKeys: github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
