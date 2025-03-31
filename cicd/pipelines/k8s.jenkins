@@ -1,16 +1,41 @@
-#!/usr/bin/env groovy
-
 pipeline {
-  agent any
-  stages {
-    stage('Run K8s Tests') {
-      steps {
-        script {
-          // Verify cluster access
-          sh 'kubectl cluster-info'
-          
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
+spec:
+  serviceAccountName: jenkins
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  containers:
+  - name: shell
+    image: ubuntu
+    command: ["sleep"]
+    args: ["infinity"]
+    tty: true
+  - name: helm
+    image: alpine/helm:latest
+    command: ["sleep"]
+    args: ["infinity"]
+'''
+            defaultContainer 'shell'
         }
-      }
     }
-  }
+    stages {
+        stage('Test') {
+            steps {
+                container('helm') {
+                    sh '''
+                        echo "Testing helm access..."
+                        helm
+                    '''
+                }
+            }
+        }
+    }
 }
