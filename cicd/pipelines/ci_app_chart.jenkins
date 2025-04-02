@@ -50,7 +50,10 @@ spec:
                         sh '''
                             echo "Logging into OCI registry..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
-                            
+
+                            echo "Setting values.yaml (default values for the packaged chart)..."
+                            mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
+
                             echo "Packaging Helm chart..."
                             helm package ${CHART_DIR} --version ${CHART_VERSION}
                             
@@ -59,6 +62,7 @@ spec:
                             
                             echo "Cleaning up..."
                             rm -f ${CHART_NAME}-${CHART_VERSION}.tgz
+                            mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
                         '''
                     }
                 }
