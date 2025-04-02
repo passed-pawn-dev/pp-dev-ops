@@ -33,10 +33,11 @@ spec:
         CHART_DIR = "k8s/pp-chart"
         CHART_NAME = "pp-app"
         CHART_VERSION = "1.0.0"
-        REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops"
+        REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
     }
     stages {
         stage('Package and Push Chart') {
+            when { changeset "k8s/pp-chart/**"}
             steps {
                 container('helm') {
                     withCredentials([
