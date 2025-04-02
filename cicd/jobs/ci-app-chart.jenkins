@@ -10,7 +10,7 @@ pipelineJob('Ci pipeline') {
                     branch 'main'
                 }
             }
-            scriptPath 'cicd/pipelines/ci.jenkins'
+            scriptPath 'cicd/pipelines/ci-app-chart.jenkins'
         }
     }
     triggers {
