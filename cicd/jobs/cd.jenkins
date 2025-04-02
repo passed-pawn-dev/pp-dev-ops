@@ -1,4 +1,4 @@
-pipelineJob('my-application-pipeline') {
+pipelineJob('Setup cd pipeline') {
     definition {
         cpsScm {
             scm {
@@ -10,7 +10,7 @@ pipelineJob('my-application-pipeline') {
                     branch 'main'
                 }
             }
-            scriptPath ''
+            scriptPath 'cicd/pipelines/cd.jenkins'
         }
     }
     triggers {

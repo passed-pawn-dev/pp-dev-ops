@@ -47,7 +47,7 @@ spec:
                         )
                     ]) {
                         sh '''
-                            echo "Testing helm access..."
+                            echo "Testing helm access (CD)..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
                             helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/pp-app -f "$CHART_SECRETS"
                         '''

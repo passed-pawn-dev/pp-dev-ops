@@ -1,27 +1,56 @@
 pipeline {
-    agent any
-    
-    triggers {
-        pollSCM('H/5 * * * *') // Poll every 5 minutes
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
+spec:
+  serviceAccountName: jenkins
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  containers:
+  - name: shell
+    image: ubuntu
+    command: ["sleep"]
+    args: ["infinity"]
+    tty: true
+  - name: helm
+    image: alpine/helm:latest
+    command: ["sleep"]
+    args: ["infinity"]
+'''
+            defaultContainer 'shell'
+        }
     }
-    
+    environment {
+        HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
+        HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
+        HELM_DATA_HOME = "${WORKSPACE}/.helm/data"
+    }
     stages {
-        stage('Check for New Chart') {
+        stage('Test') {
             steps {
-                script {
-                    def latestVersion = sh(script: '''
-                        curl -s -H "Authorization: Bearer $(echo "$REGISTRY_TOKEN" | base64)" \
-                        https://ghcr.io/v2/passed-pawn-dev/pp-dev-ops/pp-app/tags/list | jq -r '.tags[]' | sort -V | tail -1
-                    ''', returnStdout: true).trim()
-                    
-                    def lastDeployedVersion = sh(script: '''
-                        helm get values pp-app -o json | jq -r '.image.tag'
-                    ''', returnStdout: true).trim()
-                    
-                    if (latestVersion != lastDeployedVersion) {
-                        // Trigger deployment
-                        build job: 'your-helm-deployment-job', 
-                              parameters: [string(name: 'CHART_VERSION', value: latestVersion)]
+                container('helm') {
+                    withCredentials([
+                        file(
+                            credentialsId: 'pp-app-chart-secrets-file',
+                            variable: 'CHART_SECRETS'
+                        ),
+                        usernamePassword(
+                            credentialsId: 'pp-cicd-github-service-account-personal-access-token',
+                            usernameVariable: 'REGISTRY_USER',
+                            passwordVariable: 'REGISTRY_TOKEN'
+                        )
+                    ]) {
+                        sh '''
+                            echo "Testing helm access (CI)..."
+                            echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
+                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/pp-app -f "$CHART_SECRETS"
+                        '''
                     }
                 }
             }
