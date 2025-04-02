@@ -10,7 +10,7 @@ pipelineJob('Cd pipeline') {
                     branch 'main'
                 }
             }
-            scriptPath 'cicd/pipelines/cd-app-chart.jenkins'
+            scriptPath 'cicd/pipelines/cd_app_chart.jenkins'
         }
     }
     triggers {
