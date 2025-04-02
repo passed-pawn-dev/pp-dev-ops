@@ -2,8 +2,5 @@ dependencies:
 - name: ingress-nginx
   repository: https://kubernetes.github.io/ingress-nginx
   version: 4.12.0
-- name: jenkins-operator
-  repository: https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/chart
-  version: 0.8.1
-digest: sha256:cb9f945afd9c854288f3e6aa84d60cdcd3207b62eafff47e13da275a667cdf65
-generated: "2025-03-24T15:04:18.1986161+01:00"
+digest: sha256:3289b2e22c01beaa0c420bcd248c68967ab1c5d2ad35a52d9ea173f0080728ae
+generated: "2025-03-31T18:37:45.4913533+02:00"

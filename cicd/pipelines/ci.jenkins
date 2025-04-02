@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    
+    triggers {
+        pollSCM('H/5 * * * *') // Poll every 5 minutes
+    }
+    
+    stages {
+        stage('Check for New Chart') {
+            steps {
+                script {
+                    def latestVersion = sh(script: '''
+                        curl -s -H "Authorization: Bearer $(echo "$REGISTRY_TOKEN" | base64)" \
+                        https://ghcr.io/v2/passed-pawn-dev/pp-dev-ops/pp-app/tags/list | jq -r '.tags[]' | sort -V | tail -1
+                    ''', returnStdout: true).trim()
+                    
+                    def lastDeployedVersion = sh(script: '''
+                        helm get values pp-app -o json | jq -r '.image.tag'
+                    ''', returnStdout: true).trim()
+                    
+                    if (latestVersion != lastDeployedVersion) {
+                        // Trigger deployment
+                        build job: 'your-helm-deployment-job', 
+                              parameters: [string(name: 'CHART_VERSION', value: latestVersion)]
+                    }
+                }
+            }
+        }
+    }
+}

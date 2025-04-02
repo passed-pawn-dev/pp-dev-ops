@@ -1,0 +1,59 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
+spec:
+  serviceAccountName: jenkins
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
+  containers:
+  - name: shell
+    image: ubuntu
+    command: ["sleep"]
+    args: ["infinity"]
+    tty: true
+  - name: helm
+    image: alpine/helm:latest
+    command: ["sleep"]
+    args: ["infinity"]
+'''
+            defaultContainer 'shell'
+        }
+    }
+    environment {
+        HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
+        HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
+        HELM_DATA_HOME = "${WORKSPACE}/.helm/data"
+    }
+    stages {
+        stage('Test') {
+            steps {
+                container('helm') {
+                    withCredentials([
+                        file(
+                            credentialsId: 'pp-app-chart-secrets-file',
+                            variable: 'CHART_SECRETS'
+                        ),
+                        usernamePassword(
+                            credentialsId: 'pp-cicd-github-service-account-personal-access-token',
+                            usernameVariable: 'REGISTRY_USER',
+                            passwordVariable: 'REGISTRY_TOKEN'
+                        )
+                    ]) {
+                        sh '''
+                            echo "Testing helm access..."
+                            echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
+                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/pp-app -f "$CHART_SECRETS"
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}

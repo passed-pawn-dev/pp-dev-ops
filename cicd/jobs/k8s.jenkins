@@ -1,31 +1,21 @@
-#!/usr/bin/env groovy
-
-pipelineJob('k8s-e2e') {
-    displayName('Kubernetes Plugin E2E Test')
-
-    logRotator {
-        numToKeep(10)
-        daysToKeep(30)
-    }
-
-    configure { project ->
-        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
-            hint('PERFORMANCE_OPTIMIZED')
-        }
-    }
-
+pipelineJob('my-application-pipeline') {
     definition {
         cpsScm {
             scm {
                 git {
                     remote {
-                        url('https://github.com/jenkinsci/kubernetes-operator.git')
-                        credentials('jenkins-operator')
+                        url 'https://github.com/myorg/myapp.git'
                     }
-                    branches('*/master')
+                    branch 'main'
                 }
             }
-            scriptPath('cicd/pipelines/k8s.jenkins')
+            scriptPath 'Jenkinsfile'
         }
+    }
+    triggers {
+        scm('H/5 * * * *')
+    }
+    properties {
+        disableConcurrentBuilds()
     }
 }
