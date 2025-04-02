@@ -11,3 +11,118 @@ data:
         sshHostKeyVerificationStrategy:
           manuallyProvidedKeyVerificationStrategy:
             approvedHostKeys: github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+---
+# override default configmap which causes error in the newest lts jenkins version (2.492.2-lts)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-operator-base-configuration-jenkins
+  labels:
+    app: jenkins-operator
+    jenkins-cr: jenkins
+data:
+  1-basic-settings.groovy: |
+
+    import jenkins.model.Jenkins
+    import jenkins.model.JenkinsLocationConfiguration       
+    import hudson.model.Node.Mode
+
+    def jenkins = Jenkins.instance
+    //Number of jobs that run simultaneously on master.     
+    jenkins.setNumExecutors(0)
+    //Jobs must specify that they want to run on master     
+    jenkins.setMode(Mode.EXCLUSIVE)
+    jenkins.save()
+  2-enable-csrf.groovy: |
+
+    import hudson.security.csrf.DefaultCrumbIssuer
+    import jenkins.model.Jenkins
+
+    def jenkins = Jenkins.instance
+
+    if (jenkins.getCrumbIssuer() == null) {
+        jenkins.setCrumbIssuer(new DefaultCrumbIssuer(true))
+        jenkins.save()
+        println('CSRF Protection enabled.')
+    } else {
+        println('CSRF Protection already configured.')      
+    }
+  3-disable-usage-stats.groovy: |2
+
+    import jenkins.model.Jenkins
+
+    def jenkins = Jenkins.instance
+
+    if (jenkins.isUsageStatisticsCollected()) {
+        jenkins.setNoUsageStatistics(true)
+        jenkins.save()
+        println('Jenkins usage stats submitting disabled.') 
+    } else {
+        println('Nothing changed.  Usage stats are not submitted to the Jenkins project.')
+    }
+  4-disable-insecure-features.groovy: |
+
+    import jenkins.*
+    import jenkins.model.*
+    import hudson.model.*
+    import jenkins.security.s2m.*
+
+    def jenkins = Jenkins.instance
+
+    println("Disabling insecure Jenkins features...")
+
+    println("Disabling CLI access of /cli URL...")
+    def remove = { list ->
+        list.each { item ->
+            if (item.getClass().name.contains("CLIAction")) {
+                println("Removing extension ${item.getClass().name}")
+                list.remove(item)
+            }
+        }
+    }
+    remove(jenkins.getExtensionList(RootAction.class))
+    remove(jenkins.actions)
+
+    if (jenkins.getDescriptor("jenkins.CLI") != null) {
+        jenkins.getDescriptor("jenkins.CLI").get().setEnabled(false)
+    }
+
+    jenkins.save()
+  5-configure-kubernetes-plugin.groovy: "\nimport com.cloudbees.plugins.credentials.CredentialsScope\nimport
+    com.cloudbees.plugins.credentials.SystemCredentialsProvider\nimport com.cloudbees.plugins.credentials.domains.Domain\nimport
+    jenkins.model.Jenkins\nimport org.csanchez.jenkins.plugins.kubernetes.KubernetesCloud\n\ndef
+    jenkins = Jenkins.getInstance()\n\ndef kubernetes = Jenkins.instance.clouds.getByName(\"kubernetes\")\ndef
+    add = false\nif (kubernetes == null) {\n    add = true\n\tkubernetes = new KubernetesCloud(\"kubernetes\")\n}\nkubernetes.setServerUrl(\"https://kubernetes.default.svc.cluster.local:443\")\nkubernetes.setNamespace(\"default\")\nkubernetes.setJenkinsUrl(\"http://jenkins-operator-http-jenkins.default.svc.cluster.local:8080\")\nkubernetes.setJenkinsTunnel(\"jenkins-operator-slave-jenkins.default.svc.cluster.local:50000\")\nkubernetes.setRetentionTimeout(15)\nif
+    (add) {\n\tjenkins.clouds.add(kubernetes)\n}\n\njenkins.save()\n"
+  6-configure-views.groovy: |2
+
+    import hudson.model.ListView
+    import jenkins.model.Jenkins
+
+    def Jenkins jenkins = Jenkins.getInstance()
+
+    def seedViewName = 'seed-jobs'
+    def nonSeedViewName = 'non-seed-jobs'
+
+    if (jenkins.getView(seedViewName) == null) {
+        def seedView = new ListView(seedViewName)
+        seedView.setIncludeRegex('.*job-dsl-seed.*')
+        jenkins.addView(seedView)
+    }
+
+    if (jenkins.getView(nonSeedViewName) == null) {
+        def nonSeedView = new ListView(nonSeedViewName)
+        nonSeedView.setIncludeRegex('((?!seed)(?!jenkins).)*')
+        jenkins.addView(nonSeedView)
+    }
+
+    jenkins.save()
+  7-disable-job-dsl-script-approval.groovy: |2
+
+    import jenkins.model.Jenkins
+    import javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration
+    import jenkins.model.GlobalConfiguration
+
+    // disable Job DSL script approval
+    GlobalConfiguration.all().get(GlobalJobDslSecurityConfiguration.class).useScriptSecurity=false
+    GlobalConfiguration.all().get(GlobalJobDslSecurityConfiguration.class).save()
