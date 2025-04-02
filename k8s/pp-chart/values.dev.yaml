@@ -32,6 +32,6 @@ keycloak:
     vendor: postgres
     host: pp-keycloak-db
     name: pp-keycloak
-    port: 5432
+    port: 5433
     username: ""
     password: ""
