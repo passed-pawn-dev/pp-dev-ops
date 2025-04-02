@@ -41,7 +41,7 @@ spec:
               anyOf {
                   changeset "k8s/pp-chart/**"
                   // initial run right away when changing pipeline
-                  changeset "cicd/pipelines/ci_app_chart"
+                  changeset "cicd/pipelines/ci_app_chart.jenkins"
               }
             }
             steps {
