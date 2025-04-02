@@ -1,0 +1,22 @@
+pipelineJob('my-application-pipeline') {
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote {
+                        url 'git@github.com:passed-pawn-dev/pp-dev-ops.git'
+                        credentials('pp-dev-ops')                        
+                    }
+                    branch 'main'
+                }
+            }
+            scriptPath ''
+        }
+    }
+    triggers {
+        scm('H/2 * * * *')
+    }
+    properties {
+        disableConcurrentBuilds()
+    }
+}
