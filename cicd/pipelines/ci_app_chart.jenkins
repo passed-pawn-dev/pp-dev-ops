@@ -37,7 +37,13 @@ spec:
     }
     stages {
         stage('Package and Push Chart') {
-            when { changeset "k8s/pp-chart/**"}
+            when {
+              anyOf {
+                  changeset "k8s/pp-chart/**"
+                  // initial run right away when changing pipeline
+                  changeset "cicd/pipelines/ci_app_chart"
+              }
+            }
             steps {
                 container('helm') {
                     withCredentials([
