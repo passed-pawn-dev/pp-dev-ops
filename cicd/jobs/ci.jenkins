@@ -1,4 +1,4 @@
-pipelineJob('Setup ci pipeline') {
+pipelineJob('Ci pipeline') {
     definition {
         cpsScm {
             scm {

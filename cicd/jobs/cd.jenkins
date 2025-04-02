@@ -1,4 +1,4 @@
-pipelineJob('Setup cd pipeline') {
+pipelineJob('Cd pipeline') {
     definition {
         cpsScm {
             scm {
