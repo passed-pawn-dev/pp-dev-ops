@@ -5,7 +5,7 @@ pipelineJob('my-application-pipeline') {
                 git {
                     remote {
                         url 'git@github.com:passed-pawn-dev/pp-dev-ops.git'
-                        credentials('pp-dev-ops')                        
+                        credentials('pp-dev-ops-ssh')                        
                     }
                     branch 'main'
                 }
