@@ -39,19 +39,13 @@ jenkins-operator:
       version: 1.262.v2670ef7ea_0c5
 
     seedJobs:
-    - id: jenkins-operator
-      targets: "cicd/jobs/*.jenkins"
-      description: "Jenkins Operator repository"
-      repositoryBranch: master
-      repositoryUrl: https://github.com/jenkinsci/kubernetes-operator.git
-
     - id: pp-dev-ops
       credentialType: external
       credentialID: pp-dev-ops-ssh
       targets: "cicd/jobs/*.jenkins"
       description: "Dev ops passed pawn repository"
       repositoryBranch: main
-      repositoryUrl: git@github.com:toKrzysztof/passed-pawn-dev-ops.git
+      repositoryUrl: git@github.com:passed-pawn-dev/pp-dev-ops.git
             
     - id: pp-frontend
       credentialType: external
@@ -59,7 +53,7 @@ jenkins-operator:
       targets: "cicd/jobs/*.jenkins"
       description: "Frontend passed pawn repository"
       repositoryBranch: main
-      repositoryUrl: git@github.com:toKrzysztof/passed-pawn-frontend.git
+      repositoryUrl: git@github.com:passed-pawn-dev/pp-frontend.git
       
     - id: pp-backend
       credentialType: external
@@ -67,7 +61,7 @@ jenkins-operator:
       targets: "cicd/jobs/*.jenkins"
       description: "Backend passed pawn repository"
       repositoryBranch: main
-      repositoryUrl: git@github.com:toKrzysztof/PassedPawn-backend.git
+      repositoryUrl: git@github.com:passed-pawn-dev/pp-backend.git
 
     backup:
       enabled: false
@@ -88,6 +82,7 @@ jenkins-operator:
       timeoutSeconds: 8
 
 secrets:
+  githubServiceAccountPersonalAccessToken: ""
   ppDevOps:
     sshPrivateKey: ""
     passphrase: ""
