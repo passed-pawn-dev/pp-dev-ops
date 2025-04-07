@@ -1,78 +1,41 @@
-def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend']
+def projects = [
+    'pp-dev-ops': [
+        githubApiUrl: 'https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-app',
+        triggeredPipeline: 'pp-dev-ops-cd-pipeline'
+    ],
+    'pp-backend': [
+        githubApiUrl: 'https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-backend',
+        triggeredPipeline: 'pp-backend-cd-pipeline'
+    ],
+    'pp-frontend': [
+        githubApiUrl: 'https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-frontend',
+        triggeredPipeline: 'pp-frontend-cd-pipeline'
+    ]
+]
 
-projects.each { project ->
-    pipelineJob("${project}-cd-trigger-pipeline") {
+projects.each { projectName, config ->
+    pipelineJob("${projectName}-poll-registry") {
         definition {
-            cps {
-                script('''
-pipeline {
-    agent any
-    
-    environment {
-        GITHUB_API_URL = "https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-app"
-        LAST_VERSION_COUNT = 0
-        TRIGGERED_PIPELINE = "${project}-cd-pipeline"
-    }
-    
-    stages {
-        stage('Initialize') {
-            steps {
-                script {
-                    // Create or load the version count file
-                    if (fileExists('version_count.txt')) {
-                        env.LAST_VERSION_COUNT = readFile('version_count.txt').trim().toInteger()
-                    } else {
-                        writeFile file: 'version_count.txt', text: '0'
-                        env.LAST_VERSION_COUNT = 0
+            cpsScm {
+                scm {
+                    git {
+                        remote {
+                            url('https://github.com/passed-pawn-dev/pp-dev-ops.git')
+                            credentials('pp-dev-ops-ssh')
+                        }
+                        branch('main')
                     }
                 }
+                scriptPath('cicd/pipelines/poll_registry.groovy')
             }
         }
-        
-        stage('Poll GitHub Packages') {
-            steps {
-                script {
-                    // Make API request to get current version count
-                    def response = sh(script: """
-                        curl -s -L \
-                        -H "Accept: application/vnd.github+json" \
-                        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                        -H "X-GitHub-Api-Version: 2022-11-28" \
-                        "${GITHUB_API_URL}"
-                    """, returnStdout: true)
-                    
-                    def json = readJSON text: response
-                    int currentVersionCount = json.version_count
-                    
-                    echo "Last version count: ${LAST_VERSION_COUNT}"
-                    echo "Current version count: ${currentVersionCount}"
-                    
-                    // Compare with previous count
-                    if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
-                        echo "New versions detected! Triggering pipeline..."
-                        writeFile file: 'version_count.txt', text: currentVersionCount.toString()
-                        
-                        // Trigger downstream pipeline
-                        build job: TRIGGERED_PIPELINE, wait: false
-                    } else {
-                        echo "No new versions detected."
-                    }
-                }
-            }
-        }
-    }
-    
-    post {
-        always {
-            echo "Polling completed. Next run in 2 minutes."
-        }
-    }
-}
-''')
-            }
+        parameters {
+            stringParam('PROJECT_NAME', projectName)
+            stringParam('GITHUB_API_URL', config.githubApiUrl)
+            stringParam('TRIGGERED_PIPELINE', config.triggeredPipeline)
         }
         triggers {
-            cron('H/2 * * * *') // Poll every 2 minutes
+            cron('H/2 * * * *')
         }
     }
 }
