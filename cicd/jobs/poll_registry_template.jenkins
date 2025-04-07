@@ -3,7 +3,7 @@ def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend']
 projects.each { project ->
     pipelineJob("${project}-cd-trigger-pipeline") {
         definition {
-            cpsScm {
+            cps {
                 script('''
 pipeline {
     agent any
