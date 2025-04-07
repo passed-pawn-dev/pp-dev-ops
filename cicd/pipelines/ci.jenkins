@@ -34,68 +34,72 @@ spec:
         CHART_NAME = "pp-app"
         REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
     }
-
-    when {
-        anyOf {
-            changeset "k8s/pp-chart/**"
-            // initial run right away when changing pipeline
-            changeset "cicd/pipelines/ci.jenkins"
-        }
-    }
-
+    
     stages {
-        stage('Prepare Version') {
-            steps {
-                script {
-                    def date = new Date().format('yyyy-MM-dd')
-                    
-                    // Get short commit hash (first 7 characters)
-                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    
-                    env.CHART_TAG = "${date}-${commitHash}"
+        stage('Execute pipeline') {
+            when {
+                anyOf {
+                    changeset "k8s/pp-chart/**"
+                    // initial run right away when changing pipeline
+                    changeset "cicd/pipelines/ci.jenkins"
                 }
             }
-        }
-        stage('Set chart default values.yaml') {
-            steps {
-                sh '''
-                    echo "Setting values.yaml (default values for the packaged chart)..."
-                    mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
-                '''
-            }
-        }
-        stage('Package and Push Chart') {
-            steps {
-                container('helm') {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'pp-cicd-github-service-account-personal-access-token',
-                            usernameVariable: 'REGISTRY_USER',
-                            passwordVariable: 'REGISTRY_TOKEN'
-                        )
-                    ]) {
-                        sh '''
-                            echo "Logging into OCI registry..."
-                            echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
-
-                            echo "Packaging Helm chart..."
-                            helm package ${CHART_DIR} --version ${CHART_TAG}
+          
+            stages {
+                stage('Prepare Version') {
+                    steps {
+                        script {
+                            def date = new Date().format('yyyy-MM-dd')
                             
-                            echo "Pushing chart to OCI registry..."
-                            helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
+                            // Get short commit hash (first 7 characters)
+                            def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                            
+                            env.CHART_TAG = "${date}-${commitHash}"
+                        }
+                    }
+                }
+                stage('Set chart default values.yaml') {
+                    steps {
+                        sh '''
+                            echo "Setting values.yaml (default values for the packaged chart)..."
+                            mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
                         '''
                     }
                 }
-            }
-        }
-        stage('Cleanup'){
-            steps {
-                sh '''
-                    echo "Cleaning up..."
+                stage('Package and Push Chart') {
+                    steps {
+                        container('helm') {
+                            withCredentials([
+                                usernamePassword(
+                                    credentialsId: 'pp-cicd-github-service-account-personal-access-token',
+                                    usernameVariable: 'REGISTRY_USER',
+                                    passwordVariable: 'REGISTRY_TOKEN'
+                                )
+                            ]) {
+                                sh '''
+                                    echo "Logging into OCI registry..."
+                                    echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
 
-                    rm -f ${CHART_NAME}-${CHART_TAG}.tgz
-                    mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
-                '''
+                                    echo "Packaging Helm chart..."
+                                    helm package ${CHART_DIR} --version ${CHART_TAG}
+                                    
+                                    echo "Pushing chart to OCI registry..."
+                                    helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
+                                '''
+                            }
+                        }
+                    }
+                }
+                stage('Cleanup'){
+                    steps {
+                        sh '''
+                            echo "Cleaning up..."
+
+                            rm -f ${CHART_NAME}-${CHART_TAG}.tgz
+                            mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
+                        '''
+                    }
+                }
             }
         }
     }
