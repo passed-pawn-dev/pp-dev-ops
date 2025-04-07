@@ -15,35 +15,43 @@ pipeline {
     environment {
         LAST_VERSION_COUNT = 0
     }
-    
+
     stages {
         stage('Poll github package') {
             steps {
-                script {
-                    // Make API request to get current version count
-                    def response = sh(script: """
-                        curl -s -L \
-                        -H "Accept: application/vnd.github+json" \
-                        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                        -H "X-GitHub-Api-Version: 2022-11-28" \
-                        "${GITHUB_API_URL}"
-                    """, returnStdout: true)
-                    
-                    def json = readJSON text: response
-                    int currentVersionCount = json.version_count
-                    
-                    echo "Last version count: ${LAST_VERSION_COUNT}"
-                    echo "Current version count: ${currentVersionCount}"
-                    
-                    // Compare with previous count
-                    if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
-                        echo "New versions detected! Triggering pipeline..."
-                        writeFile file: 'version_count.txt', text: currentVersionCount.toString()
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'pp-cicd-github-service-account-personal-access-token',
+                        usernameVariable: 'REGISTRY_USER',
+                        passwordVariable: 'REGISTRY_TOKEN'
+                    )
+                ]) {
+                    script {
+                        // Make API request to get current version count
+                        def response = sh(script: """
+                            curl -s -L \
+                            -H "Accept: application/vnd.github+json" \
+                            -H "Authorization: Bearer ${REGISTRY_TOKEN}" \
+                            -H "X-GitHub-Api-Version: 2022-11-28" \
+                            "${GITHUB_API_URL}"
+                        """, returnStdout: true)
                         
-                        // Trigger downstream pipeline
-                        build job: TRIGGERED_PIPELINE, wait: false
-                    } else {
-                        echo "No new versions detected."
+                        def json = readJSON text: response
+                        int currentVersionCount = json.version_count
+                        
+                        echo "Last version count: ${LAST_VERSION_COUNT}"
+                        echo "Current version count: ${currentVersionCount}"
+                        
+                        // Compare with previous count
+                        if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
+                            echo "New versions detected! Triggering pipeline..."
+                            writeFile file: 'version_count.txt', text: currentVersionCount.toString()
+                            
+                            // Trigger downstream pipeline
+                            build job: TRIGGERED_PIPELINE, wait: false
+                        } else {
+                            echo "No new versions detected."
+                        }
                     }
                 }
             }
