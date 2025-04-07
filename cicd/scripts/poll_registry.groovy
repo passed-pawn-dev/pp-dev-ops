@@ -12,9 +12,6 @@ pipeline {
         string(name: 'GITHUB_API_URL', defaultValue: params.githubApiUrl)
         string(name: 'TRIGGERED_PIPELINE', defaultValue: params.triggeredPipeline)
     }
-    environment {
-        LAST_VERSION_COUNT = 0
-    }
 
     stages {
         stage('Poll github package') {
@@ -27,6 +24,12 @@ pipeline {
                     )
                 ]) {
                     script {
+                        // 1. Load previous version count (default to 0 if first run)
+                        int lastVersionCount = 0
+                        if (fileExists('version_count.txt')) {
+                            lastVersionCount = readFile('version_count.txt').trim().toInteger()
+                        }
+                        
                         // Make API request to get current version count
                         def response = sh(script: '''
                             curl -s -L \
@@ -40,11 +43,11 @@ pipeline {
 
                         def currentVersionCount = (response =~ /"version_count": (\d+)/)[0][1] as Integer
                                                   
-                        echo "Last version count: ${LAST_VERSION_COUNT}"
+                        echo "Last version count: ${lastVersionCount}"
                         echo "Current version count: ${currentVersionCount}"
                         
                         // Compare with previous count
-                        if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
+                        if (currentVersionCount > lastVersionCount) {
                             echo "New versions detected! Triggering pipeline..."
                             writeFile file: 'version_count.txt', text: currentVersionCount.toString()
                             
