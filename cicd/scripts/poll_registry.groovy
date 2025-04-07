@@ -36,7 +36,7 @@ pipeline {
                             "${GITHUB_API_URL}"
                         """, returnStdout: true)
                         
-                        def json = readJSON text: response
+                        def json = new groovy.json.JsonSlurper().parseText(response)
                         int currentVersionCount = json.version_count
                         
                         echo "Last version count: ${LAST_VERSION_COUNT}"
