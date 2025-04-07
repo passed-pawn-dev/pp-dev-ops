@@ -96,6 +96,7 @@ spec:
                     rm -f ${CHART_NAME}-${CHART_TAG}.tgz
                     mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
                 ```
+            }
         }
     }
 }
