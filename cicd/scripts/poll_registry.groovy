@@ -15,6 +15,8 @@ pipeline {
     environment {
         LAST_VERSION_COUNT = 0
     }
+    
+    stages {
         stage('Poll github package') {
             steps {
                 script {
@@ -46,4 +48,5 @@ pipeline {
                 }
             }
         }
+    }
 }
