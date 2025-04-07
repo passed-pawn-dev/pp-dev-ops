@@ -1,0 +1,26 @@
+def pipelines = ['ci', 'cd']
+def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend']
+
+pipeline.each { pipeline ->
+    projects.each { project ->
+        pipelineJob('${project}-pipeline') {
+            definition {
+                cpsScm {
+                    scm {
+                        git {
+                            remote {
+                                url 'git@github.com:passed-pawn-dev/${project}.git'
+                                credentials('${project}-ssh')                 
+                            }
+                            branch 'main'
+                        }
+                    }
+                    scriptPath 'cicd/pipelines/${pipeline}.jenkins'
+                }
+            }
+            triggers {
+                scm('H/2 * * * *')
+            }
+        }
+    }
+}
