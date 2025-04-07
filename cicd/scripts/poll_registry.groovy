@@ -36,9 +36,7 @@ pipeline {
                             "${GITHUB_API_URL}"
                         ''', returnStdout: true)
                         
-                        int currentVersionCount = new groovy.json.JsonSlurperClassic()
-                            .parseText(response)
-                            .version_count as Integer
+                        def currentVersionCount = (response =~ /"version_count": (\d+)/)[0][1] as Integer
                         
                         echo "Last version count: ${LAST_VERSION_COUNT}"
                         echo "Current version count: ${currentVersionCount}"
