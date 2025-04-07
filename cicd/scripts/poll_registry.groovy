@@ -56,8 +56,6 @@ pipeline {
                               // Log full error details
                               echo "ERROR: ${e.getClass().getName()}"
                               echo "MESSAGE: ${e.getMessage()}"
-                              echo "STACK TRACE:"
-                              e.getStackTrace().each { echo it.toString() }
                               
                               // Fail the pipeline
                               error "Failed to check package versions: ${e.getMessage()}"                          
