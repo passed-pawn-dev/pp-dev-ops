@@ -28,13 +28,13 @@ pipeline {
                 ]) {
                     script {
                         // Make API request to get current version count
-                        def response = sh(script: '
+                        def response = sh(script: '''
                             curl -s -L \
                             -H "Accept: application/vnd.github+json" \
-                            -H "Authorization: Bearer ${REGISTRY_TOKEN}" \
+                            -H "Authorization: Bearer $REGISTRY_TOKEN" \
                             -H "X-GitHub-Api-Version: 2022-11-28" \
                             "${GITHUB_API_URL}"
-                        ', returnStdout: true)
+                        ''', returnStdout: true)
                         
                         int currentVersionCount = new groovy.json.JsonSlurperClassic()
                             .parseText(response)
