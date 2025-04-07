@@ -21,7 +21,7 @@ projects.each { projectName, config ->
                     git {
                         remote {
                             url('https://github.com/passed-pawn-dev/pp-dev-ops.git')
-                            credentials('pp-dev-ops-ssh')
+                            credentials("pp-dev-ops-ssh")
                         }
                         branch('main')
                     }
