@@ -58,12 +58,10 @@ spec:
         }
         stage('Set chart default values.yaml') {
             steps {
-                script {
-                    sh ```
-                        echo "Setting values.yaml (default values for the packaged chart)..."
-                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
-                    ```
-                }
+                sh ```
+                    echo "Setting values.yaml (default values for the packaged chart)..."
+                    mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
+                ```
             }
         }
         stage('Package and Push Chart') {
@@ -92,14 +90,12 @@ spec:
         }
         stage('Cleanup'){
             steps {
-                script
-                    sh ```
-                        echo "Cleaning up..."
+                sh ```
+                    echo "Cleaning up..."
 
-                        rm -f ${CHART_NAME}-${CHART_TAG}.tgz
-                        mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
-                    ```
-            }
+                    rm -f ${CHART_NAME}-${CHART_TAG}.tgz
+                    mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
+                ```
         }
     }
 }
