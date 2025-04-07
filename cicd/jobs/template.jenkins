@@ -3,19 +3,19 @@ def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend']
 
 pipelines.each { pipeline ->
     projects.each { project ->
-        pipelineJob('${project}-pipeline') {
+        pipelineJob("${project}-${pipeline}-pipeline") {
             definition {
                 cpsScm {
                     scm {
                         git {
                             remote {
-                                url 'git@github.com:passed-pawn-dev/${project}.git'
-                                credentials('${project}-ssh')                 
+                                url "git@github.com:passed-pawn-dev/${project}.git"
+                                credentials("${project}-ssh")                 
                             }
                             branch 'main'
                         }
                     }
-                    scriptPath 'cicd/pipelines/${pipeline}.jenkins'
+                    scriptPath "cicd/pipelines/${pipeline}.jenkins"
                 }
             }
             triggers {
