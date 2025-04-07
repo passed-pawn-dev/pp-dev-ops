@@ -27,29 +27,40 @@ pipeline {
                     )
                 ]) {
                     script {
-                        // Make API request to get current version count
-                        def response = sh(script: '''
-                            curl -s -L \
-                            -H "Accept: application/vnd.github+json" \
-                            -H "Authorization: Bearer $REGISTRY_TOKEN" \
-                            -H "X-GitHub-Api-Version: 2022-11-28" \
-                            "${GITHUB_API_URL}"
-                        ''', returnStdout: true)
-                        
-                        def currentVersionCount = (response =~ /"version_count": (\d+)/)[0][1] as Integer
-                        
-                        echo "Last version count: ${LAST_VERSION_COUNT}"
-                        echo "Current version count: ${currentVersionCount}"
-                        
-                        // Compare with previous count
-                        if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
-                            echo "New versions detected! Triggering pipeline..."
-                            writeFile file: 'version_count.txt', text: currentVersionCount.toString()
+                        try {
+                            // Make API request to get current version count
+                            def response = sh(script: '''
+                                curl -s -L \
+                                -H "Accept: application/vnd.github+json" \
+                                -H "Authorization: Bearer $REGISTRY_TOKEN" \
+                                -H "X-GitHub-Api-Version: 2022-11-28" \
+                                "${GITHUB_API_URL}"
+                            ''', returnStdout: true)
                             
-                            // Trigger downstream pipeline
-                            build job: TRIGGERED_PIPELINE, wait: false
-                        } else {
-                            echo "No new versions detected."
+                            def currentVersionCount = (response =~ /"version_count": (\d+)/)[0][1] as Integer
+                            
+                            echo "Last version count: ${LAST_VERSION_COUNT}"
+                            echo "Current version count: ${currentVersionCount}"
+                            
+                            // Compare with previous count
+                            if (currentVersionCount > LAST_VERSION_COUNT.toInteger()) {
+                                echo "New versions detected! Triggering pipeline..."
+                                writeFile file: 'version_count.txt', text: currentVersionCount.toString()
+                                
+                                // Trigger downstream pipeline
+                                build job: TRIGGERED_PIPELINE, wait: false
+                            } else {
+                                echo "No new versions detected."
+                            }
+                        } catch (Exception e) {
+                              // Log full error details
+                              echo "ERROR: ${e.getClass().getName()}"
+                              echo "MESSAGE: ${e.getMessage()}"
+                              echo "STACK TRACE:"
+                              e.getStackTrace().each { echo it.toString() }
+                              
+                              // Fail the pipeline
+                              error "Failed to check package versions: ${e.getMessage()}"                          
                         }
                     }
                 }
