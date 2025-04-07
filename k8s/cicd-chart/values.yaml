@@ -47,23 +47,7 @@ jenkins-operator:
       repositoryBranch: main
       repositoryUrl: git@github.com:passed-pawn-dev/pp-dev-ops.git
       buildPeriodically: "H/2 * * * *"
-            
-    - id: pp-frontend
-      credentialType: external
-      credentialID: pp-frontend-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Frontend passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: git@github.com:passed-pawn-dev/pp-frontend.git
       
-    - id: pp-backend
-      credentialType: external
-      credentialID: pp-backend-ssh
-      targets: "cicd/jobs/*.jenkins"
-      description: "Backend passed pawn repository"
-      repositoryBranch: main
-      repositoryUrl: git@github.com:passed-pawn-dev/pp-backend.git
-
     backup:
       enabled: false
     

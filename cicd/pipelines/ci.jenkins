@@ -32,18 +32,41 @@ spec:
         HELM_DATA_HOME = "${WORKSPACE}/.helm/data"
         CHART_DIR = "k8s/pp-chart"
         CHART_NAME = "pp-app"
-        CHART_VERSION = "1.0.0"
         REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
     }
+
+    when {
+        anyOf {
+            changeset "k8s/pp-chart/**"
+            // initial run right away when changing pipeline
+            changeset "cicd/pipelines/ci.jenkins"
+        }
+    }
+
     stages {
-        stage('Package and Push Chart') {
-            when {
-              anyOf {
-                  changeset "k8s/pp-chart/**"
-                  // initial run right away when changing pipeline
-                  changeset "cicd/pipelines/ci_app_chart.jenkins"
-              }
+        stage('Prepare Version') {
+            steps {
+                script {
+                    def date = new Date().format('yyyy-MM-dd')
+                    
+                    // Get short commit hash (first 7 characters)
+                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    
+                    env.CHART_TAG = "${date}-${commitHash}"
+                }
             }
+        }
+        stage('Set chart's default values.yaml') {
+            steps {
+                script {
+                    sh ```
+                        echo "Setting values.yaml (default values for the packaged chart)..."
+                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
+                    ```
+                }
+            }
+        }
+        stage('Package and Push Chart') {
             steps {
                 container('helm') {
                     withCredentials([
@@ -57,21 +80,25 @@ spec:
                             echo "Logging into OCI registry..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
 
-                            echo "Setting values.yaml (default values for the packaged chart)..."
-                            mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
-
                             echo "Packaging Helm chart..."
-                            helm package ${CHART_DIR} --version ${CHART_VERSION}
+                            helm package ${CHART_DIR} --version ${CHART_TAG}
                             
                             echo "Pushing chart to OCI registry..."
-                            helm push ${CHART_NAME}-${CHART_VERSION}.tgz oci://${REGISTRY_URL}
-                            
-                            echo "Cleaning up..."
-                            rm -f ${CHART_NAME}-${CHART_VERSION}.tgz
-                            mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
+                            helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
                         '''
                     }
                 }
+            }
+        }
+        stage('Cleanup'){
+            steps {
+                script
+                    sh ```
+                        echo "Cleaning up..."
+                        
+                        rm -f ${CHART_NAME}-${CHART_TAG}.tgz
+                        mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
+                    ```
             }
         }
     }
