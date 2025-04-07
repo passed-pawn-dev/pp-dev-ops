@@ -56,7 +56,7 @@ spec:
                 }
             }
         }
-        stage('Set chart's default values.yaml') {
+        stage('Set chart default values.yaml') {
             steps {
                 script {
                     sh ```
@@ -95,7 +95,7 @@ spec:
                 script
                     sh ```
                         echo "Cleaning up..."
-                        
+
                         rm -f ${CHART_NAME}-${CHART_TAG}.tgz
                         mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
                     ```
