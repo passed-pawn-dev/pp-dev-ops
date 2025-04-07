@@ -1,7 +1,7 @@
 def pipelines = ['ci', 'cd']
 def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend']
 
-pipeline.each { pipeline ->
+pipelines.each { pipeline ->
     projects.each { project ->
         pipelineJob('${project}-pipeline') {
             definition {
