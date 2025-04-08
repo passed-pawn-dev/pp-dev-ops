@@ -16,9 +16,6 @@ projects.each { project ->
                 scriptPath "cicd/pipelines/cd.jenkins"
             }
         }
-        triggers {
-            upstream('${project}-ci-pipeline', 'SUCCESS')
-        }
     }
 }
 

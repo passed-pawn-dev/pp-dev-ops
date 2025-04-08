@@ -105,9 +105,14 @@ spec:
     }
     post {
         success {
-            build job: "pp-dev-ops-cd-pipeline", 
-                  wait: false, 
-                  parameters: [string(name: 'TAG_TO_BUILD', value: env.CHART_TAG)]
+            script {
+                // Only trigger CD if the main stages executed
+                if (env.CHART_TAG) {
+                    build job: "pp-dev-ops-cd-pipeline", 
+                          wait: false, 
+                          parameters: [string(name: 'TAG_TO_BUILD', value: env.CHART_TAG)]
+                }
+            }
         }
     }
 }

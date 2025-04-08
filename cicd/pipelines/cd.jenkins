@@ -53,9 +53,13 @@ spec:
                         )
                     ]) {
                         sh '''
-                            echo "Testing helm access (CD)..."
+                            echo "Tag to build: ${params.TAG_TO_BUILD}"
+
+                            echo "Logging to ghcr registry..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
-                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:$TAG_TO_BUILD -f "$CHART_SECRETS"
+
+                            echo "Updating the cluster..."
+                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:${params.TAG_TO_BUILD} -f "$CHART_SECRETS"
                         '''
                     }
                 }
