@@ -3,7 +3,16 @@ kind: ConfigMap
 metadata:
   name: jenkins-operator-user-configuration
 data:
+  approve-signatures.groovy: |
+    import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval
+
+    def approval = ScriptApproval.get()
+    approval.approveSignature('groovy.json.JsonSlurperClassic')  // Note: Classic version
+    approval.approveSignature('groovy.json.JsonSlurperClassic#parseText')
+    approval.save()
   base-config.yaml: |
+    configuration-as-code:
+      deprecated: warn
     jenkins:
       systemMessage: "Configuration as Code integration works!!!"
     security:
