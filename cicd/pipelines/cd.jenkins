@@ -26,11 +26,17 @@ spec:
             defaultContainer 'shell'
         }
     }
+
+    parameters {
+        string(name: 'TAG_TO_BUILD', description: 'Latest app chart tag')
+    }
+
     environment {
         HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
         HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
         HELM_DATA_HOME = "${WORKSPACE}/.helm/data"
     }
+
     stages {
         stage('Test') {
             steps {
@@ -49,7 +55,7 @@ spec:
                         sh '''
                             echo "Testing helm access (CD)..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
-                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app -f "$CHART_SECRETS"
+                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:$TAG_TO_BUILD -f "$CHART_SECRETS"
                         '''
                     }
                 }
