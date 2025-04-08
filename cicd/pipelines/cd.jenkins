@@ -13,17 +13,11 @@ spec:
     runAsUser: 1000
     fsGroup: 1000
   containers:
-  - name: shell
-    image: ubuntu
-    command: ["sleep"]
-    args: ["infinity"]
-    tty: true
   - name: helm
     image: alpine/helm:latest
     command: ["sleep"]
     args: ["infinity"]
 '''
-            defaultContainer 'shell'
         }
     }
 
@@ -52,7 +46,7 @@ spec:
                             passwordVariable: 'REGISTRY_TOKEN'
                         )
                     ]) {
-                        sh '''
+                        sh """
                             echo "Tag to build: ${params.TAG_TO_BUILD}"
 
                             echo "Logging to ghcr registry..."
@@ -60,7 +54,7 @@ spec:
 
                             echo "Updating the cluster..."
                             helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:${params.TAG_TO_BUILD} -f "$CHART_SECRETS"
-                        '''
+                        """
                     }
                 }
             }
