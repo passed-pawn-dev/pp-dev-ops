@@ -1,7 +1,7 @@
 jenkins-operator:
   jenkins:
     # default was 2.452.2-lts, upgraded to patch known vulnerabilities
-    image: jenkins/jenkins:2.492.2-lts
+    image: jenkins/jenkins:2.492.3-lts
 
     # 2.452.2-lts jenkins compatible base plugins
     # basePlugins:
