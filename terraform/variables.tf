@@ -12,6 +12,12 @@ variable "keycloak_admin_password" {
   sensitive   = true
 }
 
+variable "pp_api_client_secret" {
+  type        = string
+  description = "Keycloak api client secret"
+  sensitive   = true
+}
+
 variable "google_client_id" {
   type        = string
   description = "Google OIDC client id"

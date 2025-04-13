@@ -37,6 +37,7 @@ resource "keycloak_openid_client" "pp_api_client" {
   enabled             = true
 
   access_type         = "CONFIDENTIAL"
+  client_secret       = var.pp_api_client_secret
   service_accounts_enabled = true
 }
 
