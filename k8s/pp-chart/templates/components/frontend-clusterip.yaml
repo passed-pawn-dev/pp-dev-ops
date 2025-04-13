@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pp-frontend
+spec:
+  selector:
+    app: pp-frontend
+  ports:
+    - port: 80
+      targetPort: 80

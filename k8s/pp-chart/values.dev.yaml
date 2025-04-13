@@ -1,3 +1,6 @@
+pullImages: false
+githubPackageRegistryToken: ""
+
 ingress:
   applicationHost: pp-local.passed-pawn.com
   keycloakHost: auth-local.passed-pawn.com
@@ -21,6 +24,10 @@ api:
     username: ""
     password: ""
     host: pp-api-db
+
+frontend:
+  replicaCount: 1
+  image: ""
   
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5

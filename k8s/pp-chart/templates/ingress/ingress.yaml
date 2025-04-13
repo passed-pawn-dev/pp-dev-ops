@@ -3,17 +3,32 @@ kind: Ingress
 metadata:
   name: pp-ingress
   labels:
-    app.kubernetes.io/name: pp
-    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    cert-manager.io/issuer: "selfsigned-issuer"
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   ingressClassName: nginx
+  # tls:
+  # - hosts:
+  #   - {{ .Values.ingress.applicationHost }}
+  #   secretName: example-tls
   rules:
     - host: {{ .Values.ingress.applicationHost }}
       http:
         paths:
-          - path: /(.*)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pp-frontend
+                port: 
+                  number: 80
+    - host: {{ .Values.ingress.applicationHost }}
+      http:
+        paths:
+          - path: /api
             pathType: Prefix
             backend:
               service:
@@ -23,7 +38,7 @@ spec:
     - host: {{ .Values.ingress.keycloakHost }}
       http:
         paths:
-          - path: /(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:

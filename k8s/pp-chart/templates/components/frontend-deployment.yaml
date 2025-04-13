@@ -1,0 +1,32 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pp-frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: pp-frontend
+  template:
+    metadata:
+      labels:
+        app: pp-frontend
+    spec:
+      {{ if .Values.pullImages }}
+      imagePullSecrets:
+        - name: pp-github-package-registry-key
+      {{ end }}
+      containers:
+        - name: pp-frontend
+          image: {{ .Values.frontend.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "400m"

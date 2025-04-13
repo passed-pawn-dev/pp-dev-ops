@@ -15,8 +15,10 @@ spec:
       containers:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
-          args: ["start-dev"]
+          args: ["--verbose", "start"]
           env:
+            - name: KC_PROXY
+              value: "edge"
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -43,7 +45,11 @@ spec:
               value: {{ .Values.keycloak.db.host }}
             - name: DB_DATABASE
               value: {{ .Values.keycloak.db.name }}
+            - name: KC_HTTP_ENABLED
+              value: "true"
             - name: DB_PORT
               value: "{{ .Values.keycloak.db.port }}"
-            - name: HOSTNAME
-              value: {{ .Values.ingress.keycloakHost }}
+            - name: KC_HOSTNAME
+              value: "https://{{ .Values.ingress.keycloakHost }}"
+            - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
+              value: "true"
