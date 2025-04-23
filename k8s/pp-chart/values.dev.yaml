@@ -16,7 +16,7 @@ ingress:
 
 api:
   replicaCount: 1
-  image: ""
+  image: pp-api
   imagePullPolicy: ""
   db:
     replicaCount: 1
@@ -27,7 +27,7 @@ api:
 
 frontend:
   replicaCount: 1
-  image: ""
+  image: pp-frontend
   
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5
