@@ -1,9 +1,3 @@
-properties([
-    parameters([
-        string(name: 'PREV_CHART_VERSION_ID', defaultValue: params.PERSISTENT_VALUE ?: "none", description: 'Previous app chart tag')
-    ])
-])
-
 pipeline {
     agent {
         kubernetes {
