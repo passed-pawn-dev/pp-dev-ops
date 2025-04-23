@@ -2,8 +2,8 @@ pullImages: false
 githubPackageRegistryToken: ""
 
 ingress:
-  applicationHost: pp-local.passed-pawn.com
-  keycloakHost: auth-local.passed-pawn.com
+  applicationHost: pp-dev.passed-pawn.com
+  keycloakHost: auth-dev.passed-pawn.com
   controller:
     service:
       type: LoadBalancer
