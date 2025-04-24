@@ -4,15 +4,6 @@ githubPackageRegistryToken: ""
 ingress:
   applicationHost: pp-local.passed-pawn.com
   keycloakHost: auth-local.passed-pawn.com
-  controller:
-    service:
-      type: LoadBalancer
-    ingressClassResource:
-      enabled: true
-      name: pp-nginx
-      default: true
-    admissionWebhooks:
-      enabled: true
 
 api:
   replicaCount: 1
