@@ -1,9 +1,16 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom "helm"
+            inheritFrom "helm yq"
+            yamlMergeStrategy merge()
         }
     }
+    
+    parameters {
+        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
+        string(name: 'BACKEND_IMAGE', defaultValue: null, description: 'Backend app image')
+    }
+    
     environment {
         HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
         HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
@@ -15,6 +22,13 @@ pipeline {
     
     stages {
         stage('Execute pipeline') {
+            when {
+                anyOf {
+                    changeset "k8s/pp-chart/**"
+                    // initial run right away when changing pipeline
+                    changeset "cicd/pipelines/ci.jenkins"
+                }
+            }
             
             stages {
                 stage('Prepare Version') {
@@ -55,10 +69,25 @@ pipeline {
                 }
                 stage('Set chart default values.yaml') {
                     steps {
-                        sh '''
-                            echo "Setting values.yaml (default values for the packaged chart)..."
-                            mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
-                        '''
+                        container('yq') {
+                            sh '''
+                                echo "Setting values.yaml (default values for the packaged chart)..."
+                                mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml   
+                            '''
+                            
+                            script {
+                                if (env.FRONTEND_IMAGE) {
+                                    sh '''
+                                        yq eval '.frontend.image = "$FRONTEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                    '''
+                                }
+                                if (env.BACKEND_IMAGE) {
+                                    sh '''
+                                        yq eval '.backend.image = "$BACKEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                    '''
+                                }                                
+                            }
+                        }
                     }
                 }
                 stage('Package and Push Chart') {
@@ -77,7 +106,7 @@ pipeline {
 
                                     echo "Packaging Helm chart..."
                                     helm package ${CHART_DIR} --version ${CHART_TAG}
-
+                                    
                                     echo "Pushing chart to OCI registry..."
                                     helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
                                 '''
