@@ -1,4 +1,4 @@
-pullImages: true
+pullImages: false
 githubPackageRegistryToken: ""
   
 ingress:
