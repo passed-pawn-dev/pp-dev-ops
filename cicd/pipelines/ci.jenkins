@@ -27,6 +27,7 @@ pipeline {
                     changeset "k8s/pp-chart/**"
                     // initial run right away when changing pipeline
                     changeset "cicd/pipelines/ci.jenkins"
+                    triggeredBy cause: "UpstreamCause"  // Triggered by another pipeline
                 }
             }
             
