@@ -78,3 +78,4 @@ secrets:
   ppBackend:
     sshPrivateKey: ""
     passphrase: ""
+  appChartSecrets: ""

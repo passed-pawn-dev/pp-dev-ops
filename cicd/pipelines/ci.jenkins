@@ -79,12 +79,12 @@ pipeline {
                             script {
                                 if (env.FRONTEND_IMAGE) {
                                     sh '''
-                                        yq eval '.frontend.image = "$FRONTEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                        yq eval '.frontend.image = "${FRONTEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
                                     '''
                                 }
                                 if (env.BACKEND_IMAGE) {
                                     sh '''
-                                        yq eval '.backend.image = "$BACKEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                        yq eval '.api.image = "${BACKEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
                                     '''
                                 }                                
                             }
