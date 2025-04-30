@@ -1,4 +1,4 @@
-pullImages: false
+pullImages: true
 githubPackageRegistryToken: ""
   
 ingress:
@@ -7,8 +7,7 @@ ingress:
 
 api:
   replicaCount: 1
-  image: pp-api
-  imagePullPolicy: ""
+  image: ghcr.io/passed-pawn-dev/pp-backend/pp-api:2025-04-24-17-33-00-9246115
   db:
     replicaCount: 1
     name: passedpawn
@@ -18,7 +17,7 @@ api:
 
 frontend:
   replicaCount: 1
-  image: pp-frontend
+  image: ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend:2025-04-24-17-33-00-e408db6
 
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5

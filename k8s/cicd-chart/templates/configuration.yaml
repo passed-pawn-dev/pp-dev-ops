@@ -1,13 +1,108 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: jenkins-operator-user-configuration
+  name: jenkins-operator-casc-configuration
 data:
   base-config.yaml: |
     configuration-as-code:
       deprecated: warn
     jenkins:
       systemMessage: "Configuration as Code integration works!!!"
+      clouds:
+        - kubernetes:
+            name: "kubernetes"
+            serverUrl: https://kubernetes.default.svc.cluster.local:443
+            jenkinsUrl: http://jenkins-operator-http-jenkins.default.svc.cluster.local:8080
+            jenkinsTunnel: jenkins-operator-slave-jenkins.default.svc.cluster.local:50000
+            retentionTimeout: 15
+            templates:
+              - name: "kaniko"
+                yaml: |
+                  apiVersion: v1
+                  kind: Pod
+                  metadata:
+                    name: kaniko
+                  spec:
+                    initContainers:
+                    - name: busybox-share-init
+                      image: busybox:musl
+                      command:
+                        - sh
+                      args:
+                        - -c
+                        - "cp -a /bin/* /busybox"
+                      volumeMounts:
+                        - name: busybox
+                          mountPath: /busybox
+                    containers:
+                    - name: kaniko
+                      image: gcr.io/kaniko-project/executor:latest
+                      command:
+                        - sleep
+                      args:
+                        - infinity
+                      volumeMounts:
+                        - name: docker-config
+                          mountPath: /kaniko/.docker
+                        - name: busybox
+                          mountPath: /busybox
+                          readOnly: true
+                      env:
+                        - name: GIT_USERNAME
+                          valueFrom: 
+                            secretKeyRef:
+                              name: pp-cicd-github-service-account-personal-access-token
+                              key: username
+                        - name: GIT_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: pp-cicd-github-service-account-personal-access-token
+                              key: password
+                        - name: PATH
+                          value: /usr/local/bin:/kaniko:/busybox   
+                            
+                    volumes:
+                      - name: docker-config
+                        secret:
+                          secretName: github-docker-config
+                          items:
+                            - key: .dockerconfigjson
+                              path: config.json
+                      - name: busybox
+                        emptyDir: {}
+                        
+              - name: "yq"
+                yaml: |
+                  apiVersion: v1
+                  kind: Pod
+                  metadata:
+                    name: yq
+                  spec:
+                    containers:
+                    - name: yq
+                      image: mikefarah/yq:latest
+                      command: ["sleep"]
+                      args: ["infinity"]
+
+              - name: "helm"
+                yaml: |
+                  apiVersion: v1
+                  kind: Pod
+                  metadata:
+                    labels:
+                      app: jenkins-agent
+                  spec:
+                    serviceAccountName: jenkins
+                    securityContext:
+                      runAsUser: 1000
+                      fsGroup: 1000
+                    containers:
+                    - name: helm
+                      image: alpine/helm:latest
+                      command: ["sleep"]
+                      args: ["infinity"]
+
+
     security:
       gitHostKeyVerificationConfiguration:
         sshHostKeyVerificationStrategy:

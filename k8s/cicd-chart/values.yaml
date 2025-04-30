@@ -53,9 +53,7 @@ jenkins-operator:
     
     configuration:
       configurationAsCode:
-        - configMapName: jenkins-operator-user-configuration
-      groovyScripts:
-        - configMapName: jenkins-operator-user-configuration
+        - configMapName: jenkins-operator-casc-configuration
     
     readinessProbe:
       failureThreshold: 60
@@ -69,6 +67,7 @@ jenkins-operator:
       timeoutSeconds: 8
 
 secrets:
+  githubDockerConfig: ""
   githubServiceAccountPersonalAccessToken: ""
   ppDevOps:
     sshPrivateKey: ""

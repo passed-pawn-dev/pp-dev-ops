@@ -1,23 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    app: jenkins-agent
-spec:
-  serviceAccountName: jenkins
-  securityContext:
-    runAsUser: 1000
-    fsGroup: 1000
-  containers:
-  - name: helm
-    image: alpine/helm:latest
-    command: ["sleep"]
-    args: ["infinity"]
-'''
+            inheritFrom "helm"
         }
     }
 

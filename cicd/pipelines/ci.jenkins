@@ -1,25 +1,16 @@
 pipeline {
     agent {
         kubernetes {
-            yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    app: jenkins-agent
-spec:
-  serviceAccountName: jenkins
-  securityContext:
-    runAsUser: 1000
-    fsGroup: 1000
-  containers:
-  - name: helm
-    image: alpine/helm:latest
-    command: ["sleep"]
-    args: ["infinity"]
-'''
+            inheritFrom "helm yq"
+            yamlMergeStrategy merge()
         }
     }
+    
+    parameters {
+        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
+        string(name: 'BACKEND_IMAGE', defaultValue: null, description: 'Backend app image')
+    }
+    
     environment {
         HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
         HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
@@ -78,10 +69,25 @@ spec:
                 }
                 stage('Set chart default values.yaml') {
                     steps {
-                        sh '''
-                            echo "Setting values.yaml (default values for the packaged chart)..."
-                            mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml      
-                        '''
+                        container('yq') {
+                            sh '''
+                                echo "Setting values.yaml (default values for the packaged chart)..."
+                                mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml   
+                            '''
+                            
+                            script {
+                                if (env.FRONTEND_IMAGE) {
+                                    sh '''
+                                        yq eval '.frontend.image = "$FRONTEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                    '''
+                                }
+                                if (env.BACKEND_IMAGE) {
+                                    sh '''
+                                        yq eval '.backend.image = "$BACKEND_IMAGE"' ${CHART_DIR}/values.yaml -i
+                                    '''
+                                }                                
+                            }
+                        }
                     }
                 }
                 stage('Package and Push Chart') {
@@ -106,16 +112,6 @@ spec:
                                 '''
                             }
                         }
-                    }
-                }
-                stage('Cleanup'){
-                    steps {
-                        sh '''
-                            echo "Cleaning up..."
-
-                            rm -f ${CHART_NAME}-${CHART_TAG}.tgz
-                            mv ${CHART_DIR}/values.yaml ${CHART_DIR}/values.dev.yaml
-                        '''
                     }
                 }
             }
