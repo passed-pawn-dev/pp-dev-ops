@@ -7,10 +7,10 @@ pipeline {
     }
     
     parameters {
-        string(name: 'FRONTEND_IMAGE', description: 'Frontend app image')
+        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
         string(name: 'FRONTEND_IMAGE_TAG', defaultValue: "latest", description: 'Frontend app image tag')
         string(name: 'BACKEND_IMAGE', description: 'Backend app image')
-        string(name: 'BACKEND_IMAGE_TAG', defaultValue: "latest", description: 'Backend app image tag')
+        string(name: 'BACKEND_IMAGE_TAG', defaultValue: null, description: 'Backend app image tag')
     }
     
     environment {
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 container('helm') {
                     script {
-                        if (params.FRONTEND_IMAGE_TAG == "latest") {
+                        if (params.FRONTEND_IMAGE_TAG == null) {
                             def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true)
 
                             if (currentFrontendImageFull) {
@@ -66,11 +66,8 @@ pipeline {
                                 env.TARGET_FRONTEND_IMAGE = "${frontendImageUrl}"
                                 env.TARGET_FRONTEND_IMAGE_TAG = "${frontendImageTag}"
                             }
-                        } else {
-                            env.TARGET_FRONTEND_IMAGE = "${params.FRONTEND_IMAGE}"
-                            env.TARGET_FRONTEND_IMAGE_TAG = "${params.FRONTEND_IMAGE_TAG}"
                         }
-                        if (params.BACKEND_IMAGE_TAG == "latest") {
+                        if (params.BACKEND_IMAGE_TAG == null) {
                             def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true)
 
                             if (currentBackendImageFull) {
@@ -81,10 +78,7 @@ pipeline {
                                 env.TARGET_BACKEND_IMAGE = "${backendImageUrl}"
                                 env.TARGET_BACKEND_IMAGE_TAG = "${backendImageTag}"
                             }
-                        } else {
-                            env.TARGET_BACKEND_IMAGE = "${params.BACKEND_IMAGE}"
-                            env.TARGET_BACKEND_IMAGE_TAG = "${params.BACKEND_IMAGE_TAG}"
-                        }    
+                        } 
                     }
                 }
             }
