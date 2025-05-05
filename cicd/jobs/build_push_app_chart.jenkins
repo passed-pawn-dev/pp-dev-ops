@@ -11,7 +11,7 @@ pipelineJob("build-push-app-chart-pipeline") {
                     branch 'main'
                 }
             }
-            scriptPath "cicd/pipelines/build-push-app-chart.jenkins"
+            scriptPath "cicd/pipelines/build_push_app_chart.jenkins"
         }
     }
 }
