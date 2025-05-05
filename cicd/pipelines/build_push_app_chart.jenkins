@@ -59,24 +59,27 @@ pipeline {
                             def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true)
 
                             if (currentFrontendImageFull) {
-                                def (currentFrontendImage, currentFrontendImageTag) = currentFrontendImageFull.split(':')
-
-                                env.TARGET_FRONTEND_IMAGE = "${params.currentFrontendImage}"
-                                env.TARGET_FRONTEND_IMAGE_TAG = "${params.currentFrontendImageTag}"
+                                def frontendImageParts = currentFrontendImageFull.split(':')
+                                def frontendImageUrl = frontendImageParts[0]
+                                def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
+                                
+                                env.TARGET_FRONTEND_IMAGE = "${params.frontendImageUrl}"
+                                env.TARGET_FRONTEND_IMAGE_TAG = "${params.frontendImageTag}"
                             }
                         }
                         if (params.BACKEND_IMAGE_TAG == "latest") {
-                            def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image" | cut -d ":" -f 2', returnStdout: true)
+                            def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true)
 
                             if (currentBackendImageFull) {
-                                def (currentBackendImage, currentBackendImageTag) = currentBackendImageFull.split(':')
-
-                                env.TARGET_BACKEND_IMAGE = "${params.currentBackendImage}"
-                                env.TARGET_BACKEND_IMAGE_TAG = "${params.currentBackendImageTag}"
+                                def backendImageParts = currentBackendImageFull.split(':')
+                                def backendImageUrl = backendImageParts[0]
+                                def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
+                                
+                                env.TARGET_BACKEND_IMAGE = "${params.backendImageUrl}"
+                                env.TARGET_BACKEND_IMAGE_TAG = "${params.backendImageTag}"
                             }
                         }     
                     }
-                    
                 }
             }
         }
@@ -86,9 +89,11 @@ pipeline {
                     sh '''
                         echo "Setting values.yaml (default values for the packaged chart)..."
                         mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
+                        export TARGET_FRONTEND_IMAGE_FULL="$TARGET_FRONTEND_IMAGE:$TARGET_FRONTEND_IMAGE_TAG"
+                        export TARGET_BACKEND_IMAGE_FULL="$TARGET_BACKEND_IMAGE:$TARGET_BACKEND_IMAGE_TAG"
                         
-                        yq eval '.frontend.image = $TARGET_FRONTEND_IMAGE:$TARGET_FRONTEND_IMAGE_TAG' $CHART_DIR/values.yaml -i
-                        yq eval '.api.image = $TARGET_BACKEND_IMAGE:$TARGET_BACKEND_IMAGE_TAG' $CHART_DIR/values.yaml -i
+                        yq eval '.frontend.image = strenv(TARGET_FRONTEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
+                        yq eval '.api.image = strenv(TARGET_BACKEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
                     '''
                 }
             }
