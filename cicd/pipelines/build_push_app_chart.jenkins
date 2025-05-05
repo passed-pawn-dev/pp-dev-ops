@@ -63,9 +63,12 @@ pipeline {
                                 def frontendImageUrl = frontendImageParts[0]
                                 def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
                                 
-                                env.TARGET_FRONTEND_IMAGE = "${params.frontendImageUrl}"
-                                env.TARGET_FRONTEND_IMAGE_TAG = "${params.frontendImageTag}"
+                                env.TARGET_FRONTEND_IMAGE = "${frontendImageUrl}"
+                                env.TARGET_FRONTEND_IMAGE_TAG = "${frontendImageTag}"
                             }
+                        } else {
+                            env.TARGET_FRONTEND_IMAGE = "${params.FRONTEND_IMAGE}"
+                            env.TARGET_FRONTEND_IMAGE_TAG = "${params.FRONTEND_IMAGE_TAG}"
                         }
                         if (params.BACKEND_IMAGE_TAG == "latest") {
                             def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true)
@@ -75,10 +78,13 @@ pipeline {
                                 def backendImageUrl = backendImageParts[0]
                                 def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
                                 
-                                env.TARGET_BACKEND_IMAGE = "${params.backendImageUrl}"
-                                env.TARGET_BACKEND_IMAGE_TAG = "${params.backendImageTag}"
+                                env.TARGET_BACKEND_IMAGE = "${backendImageUrl}"
+                                env.TARGET_BACKEND_IMAGE_TAG = "${backendImageTag}"
                             }
-                        }     
+                        } else {
+                            env.TARGET_BACKEND_IMAGE = "${params.BACKEND_IMAGE}"
+                            env.TARGET_BACKEND_IMAGE_TAG = "${params.BACKEND_IMAGE_TAG}"
+                        }    
                     }
                 }
             }
