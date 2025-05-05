@@ -7,8 +7,10 @@ pipeline {
     }
     
     parameters {
-        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
-        string(name: 'BACKEND_IMAGE', defaultValue: null, description: 'Backend app image')
+        string(name: 'FRONTEND_IMAGE', description: 'Frontend app image')
+        string(name: 'FRONTEND_IMAGE_TAG', defaultValue: "latest", description: 'Frontend app image tag')
+        string(name: 'BACKEND_IMAGE', description: 'Backend app image')
+        string(name: 'BACKEND_IMAGE_TAG', defaultValue: "latest", description: 'Backend app image tag')
     }
     
     environment {
@@ -18,20 +20,13 @@ pipeline {
         CHART_DIR = "k8s/pp-chart"
         CHART_NAME = "pp-app"
         REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
+        TARGET_FRONTEND_IMAGE = "${params.FRONTEND_IMAGE}"
+        TARGET_FRONTEND_IMAGE_TAG = "${params.FRONTEND_IMAGE_TAG}"
+        TARGET_BACKEND_IMAGE = "${params.BACKEND_IMAGE}"
+        TARGET_BACKEND_IMAGE_TAG = "${params.BACKEND_IMAGE_TAG}"
     }
 
     stages {
-        stage('Prepare Version') {
-            steps {
-                script {
-                    def date = new Date().format("yyyy-MM-dd'T'HH-mm-ss", TimeZone.getTimeZone('GMT+2'))
-                    
-                    // Get short commit hash (first 7 characters)
-                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.CHART_TAG = "${date}-${commitHash}---$FRONTEND_IMAGE---$BACKEND_IMAGE"
-                }
-            }
-        }
         stage('Delete current package'){
             steps {
                 withCredentials([
@@ -56,45 +51,60 @@ pipeline {
                 }
             }
         }
+        stage('Set target images') {
+            steps {
+                container('helm') {
+                    script {
+                        if (params.FRONTEND_IMAGE_TAG == "latest") {
+                            def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true)
+
+                            if (currentFrontendImageFull) {
+                                def (currentFrontendImage, currentFrontendImageTag) = currentFrontendImageFull.split(':')
+
+                                env.TARGET_FRONTEND_IMAGE = "${params.currentFrontendImage}"
+                                env.TARGET_FRONTEND_IMAGE_TAG = "${params.currentFrontendImageTag}"
+                            }
+                        }
+                        if (params.BACKEND_IMAGE_TAG == "latest") {
+                            def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image" | cut -d ":" -f 2', returnStdout: true)
+
+                            if (currentBackendImageFull) {
+                                def (currentBackendImage, currentBackendImageTag) = currentBackendImageFull.split(':')
+
+                                env.TARGET_BACKEND_IMAGE = "${params.currentBackendImage}"
+                                env.TARGET_BACKEND_IMAGE_TAG = "${params.currentBackendImageTag}"
+                            }
+                        }     
+                    }
+                    
+                }
+            }
+        }
         stage('Set chart default values.yaml') {
             steps {
                 container('yq') {
                     sh '''
                         echo "Setting values.yaml (default values for the packaged chart)..."
-                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml   
+                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
+                        
+                        yq eval '.frontend.image = $TARGET_FRONTEND_IMAGE:$TARGET_FRONTEND_IMAGE_TAG' $CHART_DIR/values.yaml -i
+                        yq eval '.api.image = $TARGET_BACKEND_IMAGE:$TARGET_BACKEND_IMAGE_TAG' $CHART_DIR/values.yaml -i
                     '''
-                    
-                    script {
-                        if (env.FRONTEND_IMAGE) {
-                            sh """
-                                yq eval '.frontend.image = "${params.FRONTEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
-                            """
-                        } else {
-                            def currentFrontendImage = sh(script: 'helm get values $CHART_NAME --all | yq ".frontend.image"', returnStdout: true)
-
-                            if (currentFrontendImage) {
-                                sh """
-                                    yq eval '.api.image = "${currentFrontendImage}"' ${CHART_DIR}/values.yaml -i
-                                """
-                            }
-                        }
-                        if (env.BACKEND_IMAGE) {
-                            sh """
-                                yq eval '.api.image = "${params.BACKEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
-                            """
-                        } else {
-                            def currentBackendImage = sh(script: 'helm get values $CHART_NAME --all | yq ".api.image"', returnStdout: true)
-
-                            if (currentBackendImage) {
-                                sh """
-                                    yq eval '.api.image = "${currentBackendImage}"' ${CHART_DIR}/values.yaml -i
-                                """                              
-                            }
-                        }                         
-                    }
                 }
             }
         }
+        stage('Prepare Version') {
+            steps {
+                script {
+                    def date = new Date().format("yyyy-MM-dd'T'HH-mm-ss", TimeZone.getTimeZone('GMT+2'))
+                    
+                    // Get short commit hash (first 7 characters)
+                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.CHART_TAG = "${date}-${commitHash}---$TARGET_FRONTEND_IMAGE_TAG---$TARGET_BACKEND_IMAGE_TAG"
+                }
+            }
+        }
+        
         stage('Package and Push Chart') {
             steps {
                 container('helm') {
