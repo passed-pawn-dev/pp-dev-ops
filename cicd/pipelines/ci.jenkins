@@ -32,7 +32,7 @@ pipeline {
                 // Only trigger CD if the main stages executed
                 if (env.CHART_TAG) {
                     build job: "build-push-app-chart-pipeline", 
-                          wait: false,
+                          wait: false
                 }
             }
         }
