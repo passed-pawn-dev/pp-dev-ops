@@ -24,7 +24,7 @@ pipeline {
         stage('Prepare Version') {
             steps {
                 script {
-                    def date = new Date().format('yyyy-MM-ddTHH-mm-ss', TimeZone.getTimeZone('GMT+2'))
+                    def date = new Date().format('yyyy-MM-dd"T"HH-mm-ss', TimeZone.getTimeZone('GMT+2'))
                     
                     // Get short commit hash (first 7 characters)
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
