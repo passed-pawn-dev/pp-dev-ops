@@ -1,7 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom "busybox-jq"
+            inheritFrom "helm yq"
+            yamlMergeStrategy merge()
         }
     }
     
