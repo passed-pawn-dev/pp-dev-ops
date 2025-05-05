@@ -13,7 +13,7 @@ ingress-nginx:
 
 api:
   replicaCount: 1
-  image: pp-api
+  image: ghcr.io/passed-pawn-dev/pp-backend/pp-api:latest
   db:
     replicaCount: 1
     name: passedpawn
@@ -23,7 +23,7 @@ api:
 
 frontend:
   replicaCount: 1
-  image: pp-frontend
+  image: ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend:latest
   
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5
