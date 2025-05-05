@@ -19,9 +19,11 @@ pipeline {
             
             stages {
                 stage('Lint app chart') {
-                    sh """
-                        echo "TODO - implement helm lint"
-                    """
+                    steps {                
+                        sh """
+                            echo "TODO - implement helm lint"
+                        """
+                    }
                 }
             }
         }
