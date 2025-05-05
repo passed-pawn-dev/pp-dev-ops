@@ -1,23 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom "helm yq"
-            yamlMergeStrategy merge()
+            inheritFrom "busybox-jq"
         }
-    }
-    
-    parameters {
-        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
-        string(name: 'BACKEND_IMAGE', defaultValue: null, description: 'Backend app image')
-    }
-    
-    environment {
-        HELM_CACHE_HOME = "${WORKSPACE}/.helm/cache"
-        HELM_CONFIG_HOME = "${WORKSPACE}/.helm/config"
-        HELM_DATA_HOME = "${WORKSPACE}/.helm/data"
-        CHART_DIR = "k8s/pp-chart"
-        CHART_NAME = "pp-app"
-        REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
     }
     
     stages {
@@ -32,88 +17,10 @@ pipeline {
             }
             
             stages {
-                stage('Prepare Version') {
-                    steps {
-                        script {
-                            def date = new Date().format('yyyy-MM-dd-HH-mm-ss', TimeZone.getTimeZone('GMT+2'))
-                            
-                            // Get short commit hash (first 7 characters)
-                            def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                            
-                            env.CHART_TAG = "${date}-${commitHash}"
-                        }
-                    }
-                }
-                stage('Delete current package'){
-                    steps {
-                        withCredentials([
-                            usernamePassword(
-                                credentialsId: 'pp-cicd-github-service-account-personal-access-token',
-                                usernameVariable: 'REGISTRY_USER',
-                                passwordVariable: 'REGISTRY_TOKEN'
-                            )
-                        ]) {                        
-                            script {
-                                def response = sh(script: '''
-                                    curl -L \
-                                      -X DELETE \
-                                      -H "Accept: application/vnd.github+json" \
-                                      -H "Authorization: Bearer $REGISTRY_TOKEN" \
-                                      -H "X-GitHub-Api-Version: 2022-11-28" \
-                                      https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-app
-                                ''', returnStdout: true)
-                                
-                                echo "Delete package response: ${response}"
-                            }
-                        }
-                    }
-                }
-                stage('Set chart default values.yaml') {
-                    steps {
-                        container('yq') {
-                            sh '''
-                                echo "Setting values.yaml (default values for the packaged chart)..."
-                                mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml   
-                            '''
-                            
-                            script {
-                                if (env.FRONTEND_IMAGE) {
-                                    sh """
-                                        yq eval '.frontend.image = "${params.FRONTEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
-                                    """
-                                }
-                                if (env.BACKEND_IMAGE) {
-                                    sh """
-                                        yq eval '.api.image = "${params.BACKEND_IMAGE}"' ${CHART_DIR}/values.yaml -i
-                                    """
-                                }                                
-                            }
-                        }
-                    }
-                }
-                stage('Package and Push Chart') {
-                    steps {
-                        container('helm') {
-                            withCredentials([
-                                usernamePassword(
-                                    credentialsId: 'pp-cicd-github-service-account-personal-access-token',
-                                    usernameVariable: 'REGISTRY_USER',
-                                    passwordVariable: 'REGISTRY_TOKEN'
-                                )
-                            ]) {
-                                sh '''
-                                    echo "Logging into OCI registry..."
-                                    echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
-
-                                    echo "Packaging Helm chart..."
-                                    helm package ${CHART_DIR} --version ${CHART_TAG}
-                                    
-                                    echo "Pushing chart to OCI registry..."
-                                    helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
-                                '''
-                            }
-                        }
-                    }
+                stage('Lint app chart') {
+                    sh """
+                        echo "TODO - implement helm lint"
+                    """
                 }
             }
         }
@@ -123,9 +30,8 @@ pipeline {
             script {
                 // Only trigger CD if the main stages executed
                 if (env.CHART_TAG) {
-                    build job: "pp-dev-ops-cd-pipeline", 
-                          wait: false, 
-                          parameters: [string(name: 'TAG_TO_BUILD', value: env.CHART_TAG)]
+                    build job: "build-push-app-chart-pipeline", 
+                          wait: false,
                 }
             }
         }

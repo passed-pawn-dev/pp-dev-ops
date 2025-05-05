@@ -1,0 +1,18 @@
+
+pipelineJob("build-push-app-chart-pipeline") {
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote {
+                        url "git@github.com:passed-pawn-dev/pp-dev-ops.git"
+                        credentials("pp-dev-ops-ssh")
+                    }
+                    branch 'main'
+                }
+            }
+            scriptPath "cicd/pipelines/build-push-app-chart.jenkins"
+        }
+    }
+}
+

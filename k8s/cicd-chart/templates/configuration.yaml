@@ -59,7 +59,7 @@ data:
                               name: pp-cicd-github-service-account-personal-access-token
                               key: password
                         - name: PATH
-                          value: /usr/local/bin:/kaniko:/busybox   
+                          value: /usr/local/bin:/kaniko:/busybox
                             
                     volumes:
                       - name: docker-config
@@ -80,9 +80,43 @@ data:
                   spec:
                     containers:
                     - name: yq
-                      image: mikefarah/yq:latest
+                      image: mikefarah/yq:4.45.2
                       command: ["sleep"]
                       args: ["infinity"]
+
+              - name: "busybox-jq"          
+                yaml: |
+                  apiVersion: v1
+                  kind: Pod
+                  metadata:
+                    name: jq
+                  spec:
+                    initContainers:
+                    - name: busybox-share-init
+                      image: busybox:musl
+                      command:
+                        - sh
+                      args:
+                        - -c
+                        - "cp -a /bin/* /busybox"
+                      volumeMounts:
+                        - name: busybox
+                          mountPath: /busybox                      
+                    containers:
+                    - name: jq
+                      image: ghcr.io/jqlang/jq:1.7.1
+                      command: ["sh", "-c"]
+                      args: 
+                        - "mkdir -p /usr/local/bin && ln -s /jq /usr/local/bin/jq && sleep infinity"
+                      volumeMounts:
+                        - name: busybox
+                          mountPath: /busybox
+                      env:
+                        - name: PATH
+                          value: /usr/local/bin:/busybox
+                    volumes:
+                      - name: busybox
+                        emptyDir: {}
 
               - name: "helm"
                 yaml: |
