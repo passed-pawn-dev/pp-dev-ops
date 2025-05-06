@@ -1,3 +1,8 @@
+def targetFrontendImage = "ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend"
+def targetFrontendImageTag = "latest"
+def targetBackendImage = "ghcr.io/passed-pawn-dev/pp-backend/pp-api"
+def targetBackendImageTag = "latest"
+
 pipeline {
     agent {
         kubernetes {
@@ -7,10 +12,10 @@ pipeline {
     }
     
     parameters {
-        string(name: 'FRONTEND_IMAGE', defaultValue: 'ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend', description: 'Frontend app image')
-        string(name: 'FRONTEND_IMAGE_TAG', defaultValue: 'latest', description: 'Frontend app image tag')
-        string(name: 'BACKEND_IMAGE', defaultValue: 'ghcr.io/passed-pawn-dev/pp-backend/pp-api', description: 'Backend app image')
-        string(name: 'BACKEND_IMAGE_TAG', defaultValue: 'latest', description: 'Backend app image tag')
+        string(name: 'FRONTEND_IMAGE', defaultValue: '', description: 'Frontend app image')
+        string(name: 'FRONTEND_IMAGE_TAG', defaultValue: '', description: 'Frontend app image tag')
+        string(name: 'BACKEND_IMAGE', defaultValue: '', description: 'Backend app image')
+        string(name: 'BACKEND_IMAGE_TAG', defaultValue: '', description: 'Backend app image tag')
     }
     
     environment {
@@ -20,14 +25,28 @@ pipeline {
         CHART_DIR = "k8s/pp-chart"
         CHART_NAME = "pp-app"
         REGISTRY_URL = "ghcr.io/passed-pawn-dev/pp-dev-ops/charts"
-        TARGET_FRONTEND_IMAGE = "${params.FRONTEND_IMAGE}"
-        TARGET_FRONTEND_IMAGE_TAG = "${params.FRONTEND_IMAGE_TAG}"
-        TARGET_BACKEND_IMAGE = "${params.BACKEND_IMAGE}"
-        TARGET_BACKEND_IMAGE_TAG = "${params.BACKEND_IMAGE_TAG}"
     }
 
     stages {
-        stage('Delete current package'){
+        stage('Validate parameters and set global state') {
+            steps {
+                script {
+                    if (!params.FRONTEND_IMAGE.isEmpty()) {
+                        targetFrontendImage = params.FRONTEND_IMAGE
+                    }
+                    if (!params.FRONTEND_IMAGE_TAG.isEmpty()) {
+                        targetFrontendImageTag = params.FRONTEND_IMAGE_TAG
+                    }
+                    if (!params.BACKEND_IMAGE.isEmpty()) {
+                        targetBackendImage = params.BACKEND_IMAGE
+                    }
+                    if (!params.BACKEND_IMAGE_TAG.isEmpty()) {
+                        targetBackendImageTag = params.BACKEND_IMAGE_TAG
+                    }
+                }
+            }
+        }
+        stage('Delete current package') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -57,7 +76,7 @@ pipeline {
                     script {
                         echo "FRONTEND IMAGE TAG PARAMETER ${params.FRONTEND_IMAGE_TAG}"
                         echo "BACKEND IMAGE TAG PARAMETER ${params.BACKEND_IMAGE_TAG}"
-                        if (params.FRONTEND_IMAGE_TAG == "latest") {
+                        if (params.FRONTEND_IMAGE_TAG.isEmpty()) {
                             def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true).trim()
                             
                             echo "CURRENT FRONTEND IMAGE: ${currentFrontendImageFull}"
@@ -69,13 +88,13 @@ pipeline {
                                 def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
                                 echo "FRONT ${frontendImageParts} ${frontendImageUrl} ${frontendImageTag}"
                                 
-                                env.TARGET_FRONTEND_IMAGE = "${frontendImageUrl}"
-                                env.TARGET_FRONTEND_IMAGE_TAG = "${frontendImageTag}"
+                                targetFrontendImage = "${frontendImageUrl}"
+                                targetFrontendImageTag = "${frontendImageTag}"
                                 
-                                echo "FRONT $TARGET_FRONTEND_IMAGE $TARGET_FRONTEND_IMAGE_TAG"
+                                echo "FRONT ${targetFrontendImage} ${targetFrontendImageTag}"
                             }
                         }
-                        if (params.BACKEND_IMAGE_TAG == "latest") {
+                        if (params.BACKEND_IMAGE_TAG.isEmpty()) {
 
                             def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true).trim()
                             
@@ -89,10 +108,10 @@ pipeline {
                                 def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
                                 echo "BACK ${backendImageParts} ${backendImageUrl} ${backendImageTag}"
                                 
-                                env.TARGET_BACKEND_IMAGE = "${backendImageUrl}"
-                                env.TARGET_BACKEND_IMAGE_TAG = "${backendImageTag}"
+                                targetBackendImage = "${backendImageUrl}"
+                                targetBackendImageTag = "${backendImageTag}"
                                 
-                                echo "BACK $TARGET_BACKEND_IMAGE $TARGET_BACKEND_IMAGE_TAG"
+                                echo "BACK ${targetBackendImage} ${targetBackendImageTag}"
                             }
                         } 
                     }
@@ -102,17 +121,17 @@ pipeline {
         stage('Set chart default values.yaml') {
             steps {
                 container('yq') {
-                    sh '''
+                    sh """
                         echo "Setting values.yaml (default values for the packaged chart)..."
                         mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
-                        echo "BOTH $TARGET_FRONTEND_IMAGE $TARGET_FRONTEND_IMAGE_TAG"
-                        echo "BOTH $TARGET_BACKEND_IMAGE $TARGET_BACKEND_IMAGE_TAG"
-                        export TARGET_FRONTEND_IMAGE_FULL="$TARGET_FRONTEND_IMAGE:$TARGET_FRONTEND_IMAGE_TAG"
-                        export TARGET_BACKEND_IMAGE_FULL="$TARGET_BACKEND_IMAGE:$TARGET_BACKEND_IMAGE_TAG"
+                        echo "BOTH ${targetFrontendImage} ${targetFrontendImageTag}"
+                        echo "BOTH ${targetBackendImage} ${targetBackendImageTag}"
+                        export TARGET_FRONTEND_IMAGE_FULL="${targetFrontendImage}:${targetFrontendImageTag}"
+                        export TARGET_BACKEND_IMAGE_FULL="${targetBackendImage}:${targetBackendImageTag}"
                         
                         yq eval '.frontend.image = strenv(TARGET_FRONTEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
                         yq eval '.api.image = strenv(TARGET_BACKEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
-                    '''
+                    """
                 }
             }
         }
@@ -123,7 +142,7 @@ pipeline {
                     
                     // Get short commit hash (first 7 characters)
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.CHART_TAG = "${date}-${commitHash}---$TARGET_FRONTEND_IMAGE_TAG---$TARGET_BACKEND_IMAGE_TAG"
+                    env.CHART_TAG = "${date}-${commitHash}---${targetFrontendImageTag}---${targetBackendImageTag}"
                 }
             }
         }
