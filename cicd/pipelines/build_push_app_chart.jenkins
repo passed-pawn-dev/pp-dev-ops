@@ -66,10 +66,13 @@ pipeline {
                                 
                                 def frontendImageParts = currentFrontendImageFull.split(':')
                                 def frontendImageUrl = frontendImageParts[0]
-                                def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest '
+                                def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
+                                echo "FRONT ${frontendImageParts} ${frontendImageUrl} ${frontendImageTag}"
                                 
                                 env.TARGET_FRONTEND_IMAGE = "${frontendImageUrl}"
                                 env.TARGET_FRONTEND_IMAGE_TAG = "${frontendImageTag}"
+                                
+                                echo "FRONT $TARGET_FRONTEND_IMAGE $TARGET_FRONTEND_IMAGE_TAG"
                             }
                         }
                         if (params.BACKEND_IMAGE_TAG == "latest") {
@@ -79,17 +82,17 @@ pipeline {
                             echo "CURRENT BACKEND IMAGE: ${currentBackendImageFull}"
                             echo "Type: ${currentBackendImageFull.getClass()}"  // Check if it's String or null
                             if (currentBackendImageFull != null && !currentBackendImageFull.isEmpty() && currentBackendImageFull != "null") {
-                                
                                 echo "TEST BACKEND LOG"
+                                
                                 def backendImageParts = currentBackendImageFull.split(':')
-                                echo "backendImageParts: ${backendImageParts}"
                                 def backendImageUrl = backendImageParts[0]
-                                echo "backendImageUrl: ${backendImageUrl}"
                                 def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
-                                echo "backendImageTag: ${backendImageTag}"
+                                echo "BACK ${backendImageParts} ${backendImageUrl} ${backendImageTag}"
                                 
                                 env.TARGET_BACKEND_IMAGE = "${backendImageUrl}"
                                 env.TARGET_BACKEND_IMAGE_TAG = "${backendImageTag}"
+                                
+                                echo "BACK $TARGET_BACKEND_IMAGE $TARGET_BACKEND_IMAGE_TAG"
                             }
                         } 
                     }
@@ -102,6 +105,8 @@ pipeline {
                     sh '''
                         echo "Setting values.yaml (default values for the packaged chart)..."
                         mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
+                        echo "BOTH $TARGET_FRONTEND_IMAGE $TARGET_FRONTEND_IMAGE_TAG"
+                        echo "BOTH $TARGET_BACKEND_IMAGE $TARGET_BACKEND_IMAGE_TAG"
                         export TARGET_FRONTEND_IMAGE_FULL="$TARGET_FRONTEND_IMAGE:$TARGET_FRONTEND_IMAGE_TAG"
                         export TARGET_BACKEND_IMAGE_FULL="$TARGET_BACKEND_IMAGE:$TARGET_BACKEND_IMAGE_TAG"
                         
