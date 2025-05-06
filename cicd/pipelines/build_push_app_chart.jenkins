@@ -142,7 +142,7 @@ pipeline {
                     
                     // Get short commit hash (first 7 characters)
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.CHART_TAG = "${date}-${commitHash}---${targetFrontendImageTag}---${targetBackendImageTag}"
+                    env.CHART_TAG = "${date}C${commitHash}---${targetFrontendImageTag}---${targetBackendImageTag}"
                 }
             }
         }
