@@ -7,10 +7,10 @@ pipeline {
     }
     
     parameters {
-        string(name: 'FRONTEND_IMAGE', defaultValue: null, description: 'Frontend app image')
-        string(name: 'FRONTEND_IMAGE_TAG', defaultValue: null, description: 'Frontend app image tag')
-        string(name: 'BACKEND_IMAGE', defaultValue: null, description: 'Backend app image')
-        string(name: 'BACKEND_IMAGE_TAG', defaultValue: null, description: 'Backend app image tag')
+        string(name: 'FRONTEND_IMAGE', defaultValue: 'ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend', description: 'Frontend app image')
+        string(name: 'FRONTEND_IMAGE_TAG', defaultValue: 'latest', description: 'Frontend app image tag')
+        string(name: 'BACKEND_IMAGE', defaultValue: 'ghcr.io/passed-pawn-dev/pp-backend/pp-api', description: 'Backend app image')
+        string(name: 'BACKEND_IMAGE_TAG', defaultValue: 'latest', description: 'Backend app image tag')
     }
     
     environment {
@@ -55,29 +55,38 @@ pipeline {
             steps {
                 container('helm') {
                     script {
-                        if (params.FRONTEND_IMAGE_TAG == null) {
-                            def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true)
-
-                            if (currentFrontendImageFull) {
-
-                                echo "CURRENT FRONTEND IMAGE: ${currentFrontendImageFull}"
+                        echo "FRONTEND IMAGE TAG PARAMETER ${params.FRONTEND_IMAGE_TAG}"
+                        echo "BACKEND IMAGE TAG PARAMETER ${params.BACKEND_IMAGE_TAG}"
+                        if (params.FRONTEND_IMAGE_TAG == "latest") {
+                            def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true).trim()
+                            
+                            echo "CURRENT FRONTEND IMAGE: ${currentFrontendImageFull}"
+                            if (currentFrontendImageFull != null && !currentFrontendImageFull.isEmpty() && currentFrontendImageFull != "null") {
+                                echo "TEST FRONTEND LOG"
+                                
                                 def frontendImageParts = currentFrontendImageFull.split(':')
                                 def frontendImageUrl = frontendImageParts[0]
-                                def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
+                                def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest '
                                 
                                 env.TARGET_FRONTEND_IMAGE = "${frontendImageUrl}"
                                 env.TARGET_FRONTEND_IMAGE_TAG = "${frontendImageTag}"
                             }
                         }
-                        if (params.BACKEND_IMAGE_TAG == null) {
+                        if (params.BACKEND_IMAGE_TAG == "latest") {
 
-                            def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true)
-
-                            if (currentBackendImageFull) {
+                            def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true).trim()
+                            
                             echo "CURRENT BACKEND IMAGE: ${currentBackendImageFull}"
+                            echo "Type: ${currentBackendImageFull.getClass()}"  // Check if it's String or null
+                            if (currentBackendImageFull != null && !currentBackendImageFull.isEmpty() && currentBackendImageFull != "null") {
+                                
+                                echo "TEST BACKEND LOG"
                                 def backendImageParts = currentBackendImageFull.split(':')
+                                echo "backendImageParts: ${backendImageParts}"
                                 def backendImageUrl = backendImageParts[0]
+                                echo "backendImageUrl: ${backendImageUrl}"
                                 def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
+                                echo "backendImageTag: ${backendImageTag}"
                                 
                                 env.TARGET_BACKEND_IMAGE = "${backendImageUrl}"
                                 env.TARGET_BACKEND_IMAGE_TAG = "${backendImageTag}"
