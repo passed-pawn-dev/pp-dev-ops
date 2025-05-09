@@ -19,6 +19,11 @@ frontend:
   replicaCount: 1
   image: ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend:latest
 
+aiApi:
+  replicaCount: 1
+  image: ghcr.io/passed-pawn-dev/pp-ai/pp-ai-api:latest
+  mistralApiKey: ""
+  
 keycloak:
   image: quay.io/keycloak/keycloak:26.0.5
   replicaCount: 1

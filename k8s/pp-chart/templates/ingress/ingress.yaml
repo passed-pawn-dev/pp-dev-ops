@@ -35,6 +35,16 @@ spec:
                 name: pp-api
                 port: 
                   number: 8080
+    - host: {{ .Values.ingress.applicationHost }}
+      http:
+        paths:
+          - path: /ai
+            pathType: Prefix
+            backend:
+              service:
+                name: pp-ai-api
+                port: 
+                  number: 8000                 
     - host: {{ .Values.ingress.keycloakHost }}
       http:
         paths:
