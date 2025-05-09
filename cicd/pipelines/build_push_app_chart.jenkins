@@ -2,6 +2,8 @@ def targetFrontendImage = "ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend"
 def targetFrontendImageTag = "latest"
 def targetBackendImage = "ghcr.io/passed-pawn-dev/pp-backend/pp-api"
 def targetBackendImageTag = "latest"
+def targetAiImage = "ghcr.io/passed-pawn-dev/pp-ai/pp-ai-api"
+def targetAiImageTag = "latest"
 
 pipeline {
     agent {
@@ -16,6 +18,8 @@ pipeline {
         string(name: 'FRONTEND_IMAGE_TAG', defaultValue: '', description: 'Frontend app image tag')
         string(name: 'BACKEND_IMAGE', defaultValue: '', description: 'Backend app image')
         string(name: 'BACKEND_IMAGE_TAG', defaultValue: '', description: 'Backend app image tag')
+        string(name: 'AI_IMAGE', defaultValue: '', description: 'Ai app image')
+        string(name: 'AI_IMAGE_TAG', defaultValue: '', description: 'Ai app image tag')
     }
     
     environment {
@@ -42,6 +46,12 @@ pipeline {
                     }
                     if (!params.BACKEND_IMAGE_TAG.isEmpty()) {
                         targetBackendImageTag = params.BACKEND_IMAGE_TAG
+                    }
+                    if (!params.AI_IMAGE.isEmpty()) {
+                        targetAiImage = params.AI_IMAGE
+                    }
+                    if (!params.AI_IMAGE_TAG.isEmpty()) {
+                        targetAiImageTag = params.AI_IMAGE_TAG
                     }
                 }
             }
@@ -113,7 +123,27 @@ pipeline {
                                 
                                 echo "BACK ${targetBackendImage} ${targetBackendImageTag}"
                             }
-                        } 
+                        }
+                        if (params.AI_IMAGE_TAG.isEmpty()) {
+
+                            def currentAiImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".aiApi.image"', returnStdout: true).trim()
+                            
+                            echo "CURRENT AI IMAGE: ${currentAiImageFull}"
+                            echo "Type: ${currentAiImageFull.getClass()}"  // Check if it's String or null
+                            if (currentAiImageFull != null && !currentAiImageFull.isEmpty() && currentAiImageFull != "null") {
+                                echo "TEST AI LOG"
+                                
+                                def aiImageParts = currentAiImageFull.split(':')
+                                def aiImageUrl = aiImageParts[0]
+                                def aiImageTag = aiImageParts.size() > 1 ? aiImageParts[1] : 'latest'
+                                echo "BACK ${aiImageParts} ${aiImageUrl} ${aiImageTag}"
+                                
+                                targetAiImage = "${aiImageUrl}"
+                                targetAiImageTag = "${aiImageTag}"
+                                
+                                echo "BACK ${targetAiImage} ${targetAiImageTag}"
+                            }
+                        }
                     }
                 }
             }
@@ -126,11 +156,14 @@ pipeline {
                         mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
                         echo "BOTH ${targetFrontendImage} ${targetFrontendImageTag}"
                         echo "BOTH ${targetBackendImage} ${targetBackendImageTag}"
+                        echo "BOTH ${targetAiImage} ${targetAiImageTag}"                        
                         export TARGET_FRONTEND_IMAGE_FULL="${targetFrontendImage}:${targetFrontendImageTag}"
                         export TARGET_BACKEND_IMAGE_FULL="${targetBackendImage}:${targetBackendImageTag}"
-                        
+                        export TARGET_AI_IMAGE_FULL="${targetAiImage}:${targetAiImageTag}"
+
                         yq eval '.frontend.image = strenv(TARGET_FRONTEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
                         yq eval '.api.image = strenv(TARGET_BACKEND_IMAGE_FULL)' $CHART_DIR/values.yaml -i
+                        yq eval '.aiApi.image = strenv(TARGET_AI_IMAGE_FULL)' $CHART_DIR/values.yaml -i                        
                     """
                 }
             }
@@ -142,7 +175,7 @@ pipeline {
                     
                     // Get short commit hash (first 7 characters)
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.CHART_TAG = "${date}C${commitHash}---${targetFrontendImageTag}---${targetBackendImageTag}"
+                    env.CHART_TAG = "${date}C${commitHash}---${targetFrontendImageTag}---${targetBackendImageTag}---${targetAiImageTag}"
                 }
             }
         }
