@@ -1,4 +1,4 @@
-def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend', 'pp-ai]
+def projects = ['pp-dev-ops', 'pp-backend', 'pp-frontend', 'pp-ai']
 
 projects.each { project ->
     pipelineJob("${project}-ci-pipeline") {
