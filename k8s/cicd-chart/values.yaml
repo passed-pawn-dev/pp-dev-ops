@@ -78,4 +78,7 @@ secrets:
   ppBackend:
     sshPrivateKey: ""
     passphrase: ""
+  ppAi:
+    sshPrivateKey: ""
+    passphrase: ""
   appChartSecrets: ""
