@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pp-ai-api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      app: pp-ai-api
+  template:
+    metadata:
+      labels:
+        app: pp-ai-api
+    spec:
+    {{ if .Values.pullImages }}
+      imagePullSecrets:
+        - name: pp-github-package-registry-key
+    {{ end }}
+      containers:
+        - name: pp-ai-api
+          image: {{ .Values.aiApi.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "400m"
+          env:
+            - name: MISTRAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pp-ai-api-secrets
+                  key: mistral_api_key
