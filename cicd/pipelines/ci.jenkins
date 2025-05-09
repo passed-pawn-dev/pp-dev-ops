@@ -1,8 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom "helm yq"
-            yamlMergeStrategy merge()
+            inheritFrom "helm"
         }
     }
     
@@ -11,9 +10,7 @@ pipeline {
             when {
                 anyOf {
                     changeset "k8s/pp-chart/**"
-                    // initial run right away when changing pipeline
                     changeset "cicd/pipelines/ci.jenkins"
-                    triggeredBy cause: "BuildUpstreamCause"  // Triggered by another pipeline
                 }
             }
             
@@ -31,11 +28,8 @@ pipeline {
     post {
         success {
             script {
-                // Only trigger CD if the main stages executed
-                if (env.CHART_TAG) {
-                    build job: "build-push-app-chart-pipeline", 
-                          wait: false
-                }
+                build job: "build-push-app-chart-pipeline", 
+                      wait: false
             }
         }
     }
