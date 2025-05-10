@@ -16,6 +16,9 @@ spec:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
           args: ["--verbose", "start"]
+          ports:
+          - containerPort: 8080
+            name: http
           env:
             - name: KC_PROXY
               value: "edge"
