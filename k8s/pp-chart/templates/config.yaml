@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pp-app-ingress-nginx-controller
+data:
+  server-snippet: |
+    if ($host = "{{ .Values.keycloak.host }}") {
+      rewrite ^/admin.*$ /_403 break;
+    }
+    
+    location = /_403 {
+      internal;
+      return 403 "Access Denied";
+    }

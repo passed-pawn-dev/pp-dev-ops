@@ -3,8 +3,7 @@ githubPackageRegistryToken: ""
 
 ingress:
   applicationHost: pp-dev.passed-pawn.com
-  keycloakHost: auth-dev.passed-pawn.com
-  caSignedCertificateName: letsencrypt-prod 
+  caSignedCertificateName: letsencrypt-prod
 
 ingress-nginx:
   controller:
@@ -44,3 +43,5 @@ keycloak:
     port: 5432
     username: ""
     password: ""
+  host: auth-dev.passed-pawn.com
+  adminHost: localhost:8080

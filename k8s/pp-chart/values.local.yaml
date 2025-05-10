@@ -3,7 +3,6 @@ githubPackageRegistryToken: ""
   
 ingress:
   applicationHost: pp-local.passed-pawn.com
-  keycloakHost: auth-local.passed-pawn.com
 
 api:
   replicaCount: 1
@@ -37,3 +36,5 @@ keycloak:
     port: 5432
     username: ""
     password: ""
+  host: auth-local.passed-pawn.com
+  adminHost: localhost:8080
