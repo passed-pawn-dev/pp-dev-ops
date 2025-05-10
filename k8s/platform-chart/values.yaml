@@ -1,5 +1,4 @@
 cert-manager:
-  namespace: cert-manager
   crds:
     enabled: true
     keep: true

@@ -17,7 +17,7 @@ api:
 
 frontend:
   replicaCount: 1
-  image: ghcr.io/passed-pawn-dev/pp-frontend/pp-frontend:latest
+  image: pp-frontend
 
 aiApi:
   replicaCount: 1
