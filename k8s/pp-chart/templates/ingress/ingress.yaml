@@ -15,7 +15,7 @@ spec:
   tls:
   - hosts:
     - {{ .Values.ingress.applicationHost }}
-    - {{ .Values.ingress.keycloakHost }}
+    - {{ .Values.keycloak.host }}
     secretName: passed-pawn-tls
   {{ end }}
   rules:
@@ -49,7 +49,7 @@ spec:
                 name: pp-ai-api
                 port: 
                   number: 8000                 
-    - host: {{ .Values.ingress.keycloakHost }}
+    - host: {{ .Values.keycloak.host }}
       http:
         paths:
           - path: /

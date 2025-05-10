@@ -50,6 +50,8 @@ spec:
             - name: DB_PORT
               value: "{{ .Values.keycloak.db.port }}"
             - name: KC_HOSTNAME
-              value: "https://{{ .Values.ingress.keycloakHost }}"
+              value: "https://{{ .Values.keycloak.host }}"
+            - name: KC_HOSTNAME_ADMIN
+              value: "http://{{ .Values.keycloak.adminHost }}"
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: "true"
