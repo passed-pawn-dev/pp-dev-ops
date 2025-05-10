@@ -4,6 +4,7 @@ githubPackageRegistryToken: ""
 ingress:
   applicationHost: pp-dev.passed-pawn.com
   keycloakHost: auth-dev.passed-pawn.com
+  caSignedCertificateName: letsencrypt-staging 
 
 ingress-nginx:
   controller:
