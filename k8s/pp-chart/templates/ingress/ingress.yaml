@@ -6,12 +6,12 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
   annotations:
-    {{ if .Values.caSignedCertificateName }}
-    cert-manager.io/issuer: {{ .Values.caSignedCertificateName }}
+    {{ if .Values.ingress.caSignedCertificateName }}
+    cert-manager.io/issuer: {{ .Values.ingress.caSignedCertificateName }}
     {{ end }}
 spec:
   ingressClassName: nginx
-  {{ if .Values.caSignedCertificateName }}
+  {{ if .Values.ingress.caSignedCertificateName }}
   tls:
   - hosts:
     - {{ .Values.ingress.applicationHost }}
