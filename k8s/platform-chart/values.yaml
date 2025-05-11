@@ -3,6 +3,7 @@ cert-manager:
     enabled: true
     keep: true
   namespace: default
+
 longhorn:
   namespaceOverride: "longhorn-system"
   persistence:
@@ -16,3 +17,6 @@ longhorn:
     snapshotterReplicaCount: 1
   longhornUI:
     replicas: 1
+
+secrets:
+  longhornCryptoKey: ""
