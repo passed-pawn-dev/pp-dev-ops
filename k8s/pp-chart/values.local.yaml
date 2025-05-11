@@ -13,7 +13,8 @@ api:
     username: ""
     password: ""
     host: pp-api-db
-
+  appSettings: ""
+  
 frontend:
   replicaCount: 1
   image: pp-frontend
