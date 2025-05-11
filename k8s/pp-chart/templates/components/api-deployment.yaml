@@ -44,4 +44,14 @@ spec:
               value: {{ .Values.api.db.name }}
             - name: DB_HOST
               value: {{ .Values.api.db.host }}
-
+          volumeMounts:
+          - name: appsettings
+            mountPath: "/app/appsettings.json"
+            subPath: appsettings.json
+      volumes:
+      - name: appsettings
+        secret:
+          secretName: pp-api-secrets
+          items:
+          - key: appsettings.json
+            path: appsettings.json
