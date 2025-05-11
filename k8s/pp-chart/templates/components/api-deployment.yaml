@@ -46,8 +46,7 @@ spec:
               value: {{ .Values.api.db.host }}
           volumeMounts:
           - name: appsettings
-            mountPath: "/app/appsettings.json"
-            subPath: appsettings.json
+            mountPath: "/app/config"
       volumes:
       - name: appsettings
         secret:
