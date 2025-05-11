@@ -34,3 +34,10 @@ spec:
             #   value: password
           ports:
             - containerPort: 5432
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/pgsql/data
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: pp-api-db-pvc
