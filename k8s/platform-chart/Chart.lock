@@ -1,6 +1,6 @@
 dependencies:
-- name: cert-manager
-  repository: https://charts.jetstack.io
-  version: v1.17.1
-digest: sha256:9aa4376ac3c67f24576acb7f91dac7f1543efa59ad6e0aca56818231a0af9f2c
-generated: "2025-04-09T19:05:02.615480473+02:00"
+- name: longhorn
+  repository: https://charts.longhorn.io
+  version: 1.8.1
+digest: sha256:c3e5e71f35fd4b34cb408befa5ed90840537a10c2f0d65e915f8546e55fc646c
+generated: "2025-05-10T23:51:03.265337607+02:00"

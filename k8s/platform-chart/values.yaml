@@ -2,3 +2,17 @@ cert-manager:
   crds:
     enabled: true
     keep: true
+  namespace: default
+longhorn:
+  namespaceOverride: "longhorn-system"
+  persistence:
+    # change to retain for production
+    reclaimPolicy: delete
+    defaultClassReplicaCount: 1
+  csi:
+    attacherReplicaCount: 1
+    provisionerReplicaCount: 1
+    resizerReplicaCount: 1
+    snapshotterReplicaCount: 1
+  longhornUi:
+    replicas: 1
