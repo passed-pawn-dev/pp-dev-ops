@@ -14,5 +14,5 @@ longhorn:
     provisionerReplicaCount: 1
     resizerReplicaCount: 1
     snapshotterReplicaCount: 1
-  longhornUi:
+  longhornUI:
     replicas: 1
