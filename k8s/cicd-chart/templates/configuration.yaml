@@ -13,9 +13,10 @@ data:
         - kubernetes:
             name: "kubernetes"
             serverUrl: https://kubernetes.default.svc.cluster.local:443
-            jenkinsUrl: http://jenkins-operator-http-jenkins.default.svc.cluster.local:8080
-            jenkinsTunnel: jenkins-operator-slave-jenkins.default.svc.cluster.local:50000
+            jenkinsUrl: http://jenkins-operator-http-jenkins.{{ index .Values "jenkins-operator" "jenkins" "namespace" }}.svc.cluster.local:8080
+            jenkinsTunnel: jenkins-operator-slave-jenkins.{{ index .Values "jenkins-operator" "jenkins" "namespace" }}.svc.cluster.local:50000
             retentionTimeout: 15
+            namespace: {{ index .Values "jenkins-operator" "jenkins" "namespace" }}
             templates:
               - name: "kaniko"
                 yaml: |
