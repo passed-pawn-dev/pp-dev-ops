@@ -16,6 +16,15 @@ pipeline {
     }
 
     stages {
+        stage('Validate parameters') {
+            steps {
+                script {
+                    if (params.TAG_TO_BUILD.isEmpty()) {
+                        error("TAG_TO_BUILD parameter cannot be empty")
+                    }
+                }
+            }
+        }
         stage('Upgrade chart') {
             steps {
                 container('helm') {
@@ -31,14 +40,17 @@ pipeline {
                         )
                     ]) {
                         sh """
-                            echo "Tag to build: ${params.TAG_TO_BUILD}"
+                            export TAG_TO_BUILD="${params.TAG_TO_BUILD}"
+                        """
+                        sh '''
+                            echo "Tag to build: $TAG_TO_BUILD"
 
                             echo "Logging to ghcr registry..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
 
                             echo "Updating the cluster..."
-                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:${params.TAG_TO_BUILD} -f "$CHART_SECRETS"
-                        """
+                            helm upgrade --install pp-app oci://ghcr.io/passed-pawn-dev/pp-dev-ops/charts/pp-app:$TAG_TO_BUILD -f "$CHART_SECRETS"
+                        '''
                     }
                 }
             }
