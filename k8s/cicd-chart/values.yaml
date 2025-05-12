@@ -1,5 +1,6 @@
 jenkins-operator:
   jenkins:
+    namespace: jenkins
     # default was 2.452.2-lts, upgraded to patch known vulnerabilities
     image: jenkins/jenkins:2.492.3-lts
 
