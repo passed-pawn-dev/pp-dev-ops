@@ -12,6 +12,10 @@ spec:
       labels:
         app: pp-keycloak
     spec:
+    {{ if .Values.pullImages }}
+      imagePullSecrets:
+        - name: pp-github-package-registry-key
+    {{ end }}    
       containers:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
@@ -58,3 +62,7 @@ spec:
               value: "http://{{ .Values.keycloak.adminHost }}"
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: "true"
+      volumes:
+      - name: theme
+          - key: appsettings.json
+            path: appsettings.json
