@@ -62,7 +62,3 @@ spec:
               value: "http://{{ .Values.keycloak.adminHost }}"
             - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
               value: "true"
-      volumes:
-      - name: theme
-          - key: appsettings.json
-            path: appsettings.json
