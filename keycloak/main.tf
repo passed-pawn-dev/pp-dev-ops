@@ -25,7 +25,7 @@ resource "keycloak_realm" "realm" {
   display_name      = "passed-pawn"
   display_name_html = "<b>passed-pawn</b>"
 
-  login_theme = "keycloak"
+  login_theme = "pp-theme"
 
   access_code_lifespan = "1h"
 }
