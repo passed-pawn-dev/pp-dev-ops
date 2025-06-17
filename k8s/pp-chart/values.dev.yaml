@@ -33,7 +33,7 @@ aiApi:
   mistralApiKey: ""
 
 keycloak:
-  image: ghcr.io/passed-pawn-dev/pp-keycloak/pp-keycloak:latest
+  image: quay.io/keycloak/keycloak:26.0.5
   replicaCount: 1
   adminUsername: ""
   adminPassword: ""
@@ -46,6 +46,6 @@ keycloak:
     username: ""
     password: ""
   host: auth-dev.passed-pawn.com
-  adminHost: localhost:10008
+  adminHost: localhost:8080
 
 manualPvsEnabled: false
