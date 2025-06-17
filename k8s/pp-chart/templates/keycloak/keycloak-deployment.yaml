@@ -19,7 +19,7 @@ spec:
       containers:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
-          args: ["--verbose", "start"]
+          args: ["--verbose", "start", '--optimized']
           ports:
           - containerPort: 8080
             name: http

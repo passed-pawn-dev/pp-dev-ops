@@ -46,6 +46,6 @@ keycloak:
     username: ""
     password: ""
   host: auth-dev.passed-pawn.com
-  adminHost: localhost:8080
+  adminHost: localhost:10008
 
 manualPvsEnabled: false
