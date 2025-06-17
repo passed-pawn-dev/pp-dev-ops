@@ -12,14 +12,10 @@ spec:
       labels:
         app: pp-keycloak
     spec:
-    {{ if .Values.pullImages }}
-      imagePullSecrets:
-        - name: pp-github-package-registry-key
-    {{ end }}    
       containers:
         - name: pp-keycloak
           image: {{ .Values.keycloak.image }}
-          args: ["--verbose", "start", '--optimized']
+          args: ["--verbose", "start"]
           ports:
           - containerPort: 8080
             name: http
