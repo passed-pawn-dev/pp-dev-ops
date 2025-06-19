@@ -33,7 +33,7 @@ aiApi:
   mistralApiKey: ""
 
 keycloak:
-  image: quay.io/keycloak/keycloak:26.0.5
+  image: ghcr.io/passed-pawn-dev/pp-keycloak/pp-keycloak:latest
   replicaCount: 1
   adminUsername: ""
   adminPassword: ""
