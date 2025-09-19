@@ -74,9 +74,7 @@ pipeline {
                               -H "X-GitHub-Api-Version: 2022-11-28" \
                               https://api.github.com/orgs/passed-pawn-dev/packages/container/pp-dev-ops%2Fcharts%2Fpp-app
                         ''', returnStdout: true)
-                        
-                        echo "Delete package response: ${response}"
-                    }
+                                            }
                 }
             }
         }
@@ -84,64 +82,44 @@ pipeline {
             steps {
                 container('helm') {
                     script {
-                        echo "FRONTEND IMAGE TAG PARAMETER ${params.FRONTEND_IMAGE_TAG}"
-                        echo "BACKEND IMAGE TAG PARAMETER ${params.BACKEND_IMAGE_TAG}"
                         if (params.FRONTEND_IMAGE_TAG.isEmpty()) {
                             def currentFrontendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".frontend.image"', returnStdout: true).trim()
                             
-                            echo "CURRENT FRONTEND IMAGE: ${currentFrontendImageFull}"
                             if (currentFrontendImageFull != null && !currentFrontendImageFull.isEmpty() && currentFrontendImageFull != "null") {
-                                echo "TEST FRONTEND LOG"
                                 
                                 def frontendImageParts = currentFrontendImageFull.split(':')
                                 def frontendImageUrl = frontendImageParts[0]
                                 def frontendImageTag = frontendImageParts.size() > 1 ? frontendImageParts[1] : 'latest'
-                                echo "FRONT ${frontendImageParts} ${frontendImageUrl} ${frontendImageTag}"
                                 
                                 targetFrontendImage = "${frontendImageUrl}"
                                 targetFrontendImageTag = "${frontendImageTag}"
-                                
-                                echo "FRONT ${targetFrontendImage} ${targetFrontendImageTag}"
                             }
                         }
                         if (params.BACKEND_IMAGE_TAG.isEmpty()) {
 
                             def currentBackendImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".api.image"', returnStdout: true).trim()
                             
-                            echo "CURRENT BACKEND IMAGE: ${currentBackendImageFull}"
-                            echo "Type: ${currentBackendImageFull.getClass()}"  // Check if it's String or null
                             if (currentBackendImageFull != null && !currentBackendImageFull.isEmpty() && currentBackendImageFull != "null") {
-                                echo "TEST BACKEND LOG"
-                                
                                 def backendImageParts = currentBackendImageFull.split(':')
                                 def backendImageUrl = backendImageParts[0]
                                 def backendImageTag = backendImageParts.size() > 1 ? backendImageParts[1] : 'latest'
-                                echo "BACK ${backendImageParts} ${backendImageUrl} ${backendImageTag}"
                                 
                                 targetBackendImage = "${backendImageUrl}"
                                 targetBackendImageTag = "${backendImageTag}"
-                                
-                                echo "BACK ${targetBackendImage} ${targetBackendImageTag}"
                             }
                         }
                         if (params.AI_IMAGE_TAG.isEmpty()) {
 
                             def currentAiImageFull = sh(script: 'helm get values $CHART_NAME --all | yq -r ".aiApi.image"', returnStdout: true).trim()
                             
-                            echo "CURRENT AI IMAGE: ${currentAiImageFull}"
-                            echo "Type: ${currentAiImageFull.getClass()}"  // Check if it's String or null
+
                             if (currentAiImageFull != null && !currentAiImageFull.isEmpty() && currentAiImageFull != "null") {
-                                echo "TEST AI LOG"
-                                
                                 def aiImageParts = currentAiImageFull.split(':')
                                 def aiImageUrl = aiImageParts[0]
                                 def aiImageTag = aiImageParts.size() > 1 ? aiImageParts[1] : 'latest'
-                                echo "BACK ${aiImageParts} ${aiImageUrl} ${aiImageTag}"
                                 
                                 targetAiImage = "${aiImageUrl}"
                                 targetAiImageTag = "${aiImageTag}"
-                                
-                                echo "BACK ${targetAiImage} ${targetAiImageTag}"
                             }
                         }
                     }
@@ -152,11 +130,7 @@ pipeline {
             steps {
                 container('yq') {
                     sh """
-                        echo "Setting values.yaml (default values for the packaged chart)..."
-                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml
-                        echo "BOTH ${targetFrontendImage} ${targetFrontendImageTag}"
-                        echo "BOTH ${targetBackendImage} ${targetBackendImageTag}"
-                        echo "BOTH ${targetAiImage} ${targetAiImageTag}"                        
+                        mv ${CHART_DIR}/values.dev.yaml ${CHART_DIR}/values.yaml                  
                         export TARGET_FRONTEND_IMAGE_FULL="${targetFrontendImage}:${targetFrontendImageTag}"
                         export TARGET_BACKEND_IMAGE_FULL="${targetBackendImage}:${targetBackendImageTag}"
                         export TARGET_AI_IMAGE_FULL="${targetAiImage}:${targetAiImageTag}"
@@ -191,13 +165,9 @@ pipeline {
                         )
                     ]) {
                         sh '''
-                            echo "Logging into OCI registry..."
                             echo "$REGISTRY_TOKEN" | helm registry login ghcr.io -u "$REGISTRY_USER" --password-stdin
 
-                            echo "Packaging Helm chart..."
                             helm package ${CHART_DIR} --version ${CHART_TAG}
-                            
-                            echo "Pushing chart to OCI registry..."
                             helm push ${CHART_NAME}-${CHART_TAG}.tgz oci://${REGISTRY_URL}
                         '''
                     }
